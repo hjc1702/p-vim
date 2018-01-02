@@ -1,0 +1,316 @@
+" 非兼容vi模式。去掉讨厌的有关vi一致性模式，避免以前版本的一些bug和局限
+set nocompatible
+" filetype off " required! turn off
+
+" ----------------------------------------------------------------------------
+" 使用 vim-plug 管理插件
+" vim plugin bundle control, command model
+" ----------------------------------------------------------------------------
+
+call plug#begin('~/.vim/bundle')
+
+Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+" 主题
+Plug 'tomasr/molokai'
+Plug 'altercation/vim-colors-solarized'
+" 盘古插件用于自动格式化、标准化中文排版
+Plug 'hotoo/pangu.vim'
+" A solid language pack for Vim.
+Plug 'sheerun/vim-polyglot', {'do': './build'}
+" linter
+Plug 'w0rp/ale'
+Plug 'Valloric/YouCompleteMe'
+Plug 'scrooloose/nerdcommenter'
+Plug 'bronson/vim-trailing-whitespace'
+" 自动补全单引号，双引号等
+Plug 'Raimondi/delimitMate'
+
+" 更高效的行内移动, f/F/t/T, 才触发
+" quickscope
+Plug 'unblevable/quick-scope'
+Plug 'easymotion/vim-easymotion'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'tacahiroy/ctrlp-funky'
+Plug 'dyng/ctrlsf.vim'
+
+" view
+" airline
+" 状态栏增强展示
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+" rainbow_parentheses
+" 括号显示增强
+Plug 'kien/rainbow_parentheses.vim'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'tpope/vim-fugitive'
+Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
+Plug 'fisadev/vim-isort'
+Plug 'majutsushi/tagbar'
+Plug 'vim-python/python-syntax'
+Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+call plug#end()
+
+" open a NERDTree automatically when vim starts up if no files were specified
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
+"close vim if the only window left open is a NERDTree
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | end
+let NERDTreeHighlightCursorline=1
+let NERDTreeIgnore=[ '\.pyc$', '\.pyo$', '\.obj$', '\.o$', '\.so$', '\.egg$', '^\.git$', '^\.svn$', '^\.hg$' ]
+" s/v 分屏打开文件
+let g:NERDTreeMapOpenSplit = 's'
+let g:NERDTreeMapOpenVSplit = 'v'
+map <leader>n :NERDTreeToggle<CR>
+
+" theme
+let g:molokai_original = 1
+let g:rehash256 = 1
+
+" pangu
+autocmd BufWritePre *.markdown,*.md,*.text,*.txt,*.wiki,*.cnx call PanGuSpacing()
+
+
+" ale
+let g:ale_linters = {
+\   'python': ['flake8'],
+\   'javascript': ['eslint'],
+\}
+
+" E501 -> 120 chars
+let g:ale_python_flake8_args="--ignore=E114,E116,E131 --max-line-length=120"
+" --ignore=E225,E124,E712,E116
+
+let g:ale_sign_error = '>>'
+let g:ale_sign_warning = '>'
+
+let g:ale_statusline_format = ['⨉ %d', '⚠ %d', '⬥ ok']
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+
+nmap <silent> <Leader>ep <Plug>(ale_previous_wrap)
+nmap <silent> <Leader>en <Plug>(ale_next_wrap)
+
+nnoremap <silent> <Leader>ec :ALEToggle<CR>
+
+" troggle quickfix list
+function! ToggleErrors()
+	let old_last_winnr = winnr('$')
+	lclose
+	if old_last_winnr == winnr('$')
+		" Nothing was closed, open syntastic_error location panel
+		lopen
+	endif
+endfunction
+nnoremap <Leader>s :call ToggleErrors()<cr>
+
+let g:ale_set_highlights = 1
+highlight link ALEErrorSign  error
+highlight link ALEWarningSign Exception
+
+" Youcompleteme
+let g:ycm_python_binary_path = 'python'
+let g:ycm_complete_in_comments = 1  "在注释输入中也能补全
+let g:ycm_complete_in_strings = 1   "在字符串输入中也能补全
+let g:ycm_use_ultisnips_completer = 0 "提示UltiSnips
+let g:ycm_collect_identifiers_from_comments_and_strings = 1   "注释和字符串中的文字也会被收入补全
+let g:ycm_collect_identifiers_from_tags_files = 1
+" 开启语法关键字补全
+let g:ycm_seed_identifiers_with_syntax=1
+" 跳转到定义处, 分屏打开
+let g:ycm_goto_buffer_command = 'horizontal-split'
+" nnoremap <leader>jd :YcmCompleter GoToDefinition<CR>
+nnoremap <leader>jd :YcmCompleter GoToDefinitionElseDeclaration<CR>
+nnoremap <leader>gd :YcmCompleter GoToDeclaration<CR>
+" 回车作为选中
+let g:ycm_key_list_stop_completion = ['<CR>']
+"let g:ycm_key_list_select_completion=['<c-n>']
+let g:ycm_key_list_select_completion = ['<TAB>', '<Down>', '<c-j>']
+"let g:ycm_key_list_previous_completion=['<c-p>']
+let g:ycm_key_list_previous_completion = ['<S-TAB>', '<Up>', '<c-k>']
+let g:ycm_filetype_blacklist = {
+    \ 'tagbar' : 1,
+    \ 'gitcommit' : 1,
+    \}
+set completeopt-=preview
+
+let g:NERDSpaceDelims=1
+let g:NERDAltDelims_python = 1
+
+map <leader><space> :FixWhitespace<cr>
+
+au FileType python let b:delimitMate_nesting_quotes = ['"', "'"]
+
+let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
+
+let g:EasyMotion_use_upper = 1
+let g:EasyMotion_use_smartsign_us = 1
+let g:EasyMotion_smartcase = 1
+let g:EasyMotion_inc_highlight = 1
+let g:EasyMotion_keys = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ;'
+let g:EasyMotion_enter_jump_first = 1
+let g:EasyMotion_smartcase = 1
+map <Leader><leader>h <Plug>(easymotion-linebackward)
+map <Leader><leader>l <Plug>(easymotion-lineforward)
+nmap <Leader>f <Plug>(easymotion-overwin-f)
+nmap <Leader>w <Plug>(easymotion-overwin-w)
+" map <Leader><Leader>j <Plug>(easymotion-j)
+" map <Leader><Leader>k <Plug>(easymotion-k)
+" 重复上一次操作, 类似repeat插件, 很强大
+map <Leader><leader>. <Plug>(easymotion-repeat)
+
+
+let g:ctrlp_map = '<leader>p'
+let g:ctrlp_cmd = 'CtrlP'
+map <leader>f :CtrlPMRU<CR>
+let g:ctrlp_custom_ignore = {
+	\ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+	\ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz|pyc)$',
+	\ }
+let g:ctrlp_working_path_mode=0
+let g:ctrlp_match_window_bottom=1
+let g:ctrlp_max_height=15
+let g:ctrlp_match_window_reversed=0
+let g:ctrlp_mruf_max=500
+let g:ctrlp_follow_symlinks=1
+let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+" ctrlp插件1 - 不用ctag进行函数快速跳转
+nnoremap <Leader>fu :CtrlPFunky<Cr>
+" narrow the list down with a word under cursor
+nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+let g:ctrlp_funky_syntax_highlight = 1
+let g:ctrlp_funky_after_jump = 'zOzt'
+let g:ctrlp_funky_nerdtree_include_files = 1
+let g:ctrlp_funky_sort_by_mru = 1
+let g:ctrlp_funky_matchtype = 'path'
+let g:ctrlp_follow_symlinks = 1
+let g:ctrlp_extensions = ['funky']
+
+
+nmap \ <Plug>CtrlSFCwordPath<CR>
+let g:ctrlsf_auto_close = 0
+let g:ctrlsf_confirm_save = 0
+
+let g:rbpt_colorpairs = [
+	\ ['brown',       'RoyalBlue3'],
+	\ ['Darkblue',    'SeaGreen3'],
+	\ ['darkgray',    'DarkOrchid3'],
+	\ ['darkgreen',   'firebrick3'],
+	\ ['darkcyan',    'RoyalBlue3'],
+	\ ['darkred',     'SeaGreen3'],
+	\ ['darkmagenta', 'DarkOrchid3'],
+	\ ['brown',       'firebrick3'],
+	\ ['gray',        'RoyalBlue3'],
+	\ ['darkmagenta', 'DarkOrchid3'],
+	\ ['Darkblue',    'firebrick3'],
+	\ ['darkgreen',   'RoyalBlue3'],
+	\ ['darkcyan',    'SeaGreen3'],
+	\ ['darkred',     'DarkOrchid3'],
+	\ ['red',         'firebrick3'],
+	\ ]
+
+let g:rbpt_max = 16
+let g:rbpt_loadcmd_toggle = 0
+au VimEnter * RainbowParenthesesToggle
+au Syntax * RainbowParenthesesLoadRound
+au Syntax * RainbowParenthesesLoadSquare
+au Syntax * RainbowParenthesesLoadBraces
+
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
+let g:airline_symbols.branch = '⎇'
+let g:airline_symbols.maxlinenr = ''
+let g:airline_powerline_fonts = 1
+" unnecessary ?
+let g:airline_exclude_preview = 1
+let g:webdevicons_enable_airline_statusline = 0
+" without this line, airline won't load until there's split windows
+set laststatus=2
+" don't show mode in the bottom line
+set noshowmode
+
+nnoremap <leader>ge :Gdiff<CR>
+
+" map <C-Y> :call yapf#YAPF()<cr>
+" autocmd FileType python map <leader>a :call yapf#YAPF()<cr>
+autocmd FileType python nnoremap <leader>a :0,$!yapf<Cr> :Isort<Cr>
+autocmd FileType python vnoremap <leader>y :!yapf<Cr>
+nmap <F9> :TagbarToggle<CR>
+let g:python_highlight_all = 1
+
+
+" vim-go
+let g:go_fmt_command = "goimports"
+let g:go_autodetect_gopath = 1
+let g:go_list_type = "quickfix"
+
+let g:go_highlight_types = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_extra_types = 1
+let g:go_highlight_generate_tags = 1
+
+" Open :GoDeclsDir with ctrl-g
+nmap <C-g> :GoDeclsDir<cr>
+imap <C-g> <esc>:<C-u>GoDeclsDir<cr>
+
+
+augroup go
+  autocmd!
+
+  autocmd FileType go map <C-n> :cnext<CR>
+  autocmd FileType go map <C-m> :cprevious<CR>
+  autocmd FileType go nnoremap <leader>a :cclose<CR>
+
+  " Open :GoDeclsDir with ctrl-g
+  autocmd FileType go nmap <C-g> :GoDeclsDir<cr>
+  autocmd FileType go imap <C-g> <esc>:<C-u>GoDeclsDir<cr>
+
+  " Show by default 4 spaces for a tab
+  autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+
+  " :GoBuild and :GoTestCompile
+  autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+
+  " :GoTest
+  autocmd FileType go nmap <leader>t  <Plug>(go-test)
+
+  " :GoRun
+  autocmd FileType go nmap <leader>r  <Plug>(go-run)
+
+  " :GoDoc
+  autocmd FileType go nmap <Leader>d <Plug>(go-doc)
+
+  " :GoCoverageToggle
+  autocmd FileType go nmap <Leader>c <Plug>(go-coverage-toggle)
+
+  " :GoInfo
+  autocmd FileType go nmap <Leader>i <Plug>(go-info)
+
+  " :GoMetaLinter
+  autocmd FileType go nmap <Leader>l <Plug>(go-metalinter)
+
+  " :GoDef but opens in a vertical split
+  autocmd FileType go nmap <Leader>v <Plug>(go-def-vertical)
+  " :GoDef but opens in a horizontal split
+  autocmd FileType go nmap <Leader>s <Plug>(go-def-split)
+
+  " :GoAlternate  commands :A, :AV, :AS and :AT
+  autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+  autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+  autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+  autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+augroup END
+
+" build_go_files is a custom function that builds or compiles the test file.
+" It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file
+function! s:build_go_files()
+  let l:file = expand('%')
+  if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+  elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+  endif
+endfunction
