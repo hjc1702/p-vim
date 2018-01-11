@@ -19,7 +19,7 @@ Plug 'hotoo/pangu.vim'
 Plug 'sheerun/vim-polyglot', {'do': './build'}
 " linter
 Plug 'w0rp/ale'
-Plug 'Valloric/YouCompleteMe'
+Plug 'Valloric/YouCompleteMe', {'do': './install.py --go-completer'}
 Plug 'scrooloose/nerdcommenter'
 Plug 'bronson/vim-trailing-whitespace'
 " 自动补全单引号，双引号等
@@ -44,10 +44,10 @@ Plug 'kien/rainbow_parentheses.vim'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'tpope/vim-fugitive'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
-Plug 'fisadev/vim-isort'
+Plug 'fisadev/vim-isort', {'for': 'python'}
+Plug 'vim-python/python-syntax', {'for': 'python'}
 Plug 'majutsushi/tagbar'
-Plug 'vim-python/python-syntax'
-Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'for': 'go'}
 call plug#end()
 
 " open a NERDTree automatically when vim starts up if no files were specified
