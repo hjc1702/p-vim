@@ -44,7 +44,7 @@ Plug 'kien/rainbow_parentheses.vim'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'tpope/vim-fugitive'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
-Plug 'fisadev/vim-isort', {'for': 'python'}
+" Plug 'fisadev/vim-isort', {'for': 'python'}
 Plug 'vim-python/python-syntax', {'for': 'python'}
 Plug 'majutsushi/tagbar'
 Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'for': 'go'}
@@ -234,7 +234,7 @@ nnoremap <leader>ge :Gdiff<CR>
 
 " map <C-Y> :call yapf#YAPF()<cr>
 " autocmd FileType python map <leader>a :call yapf#YAPF()<cr>
-autocmd FileType python nnoremap <leader>a :0,$!yapf<Cr> :Isort<Cr>
+autocmd FileType python nnoremap <leader>a :0,$!yapf<Cr> :%!isort -<Cr>
 autocmd FileType python vnoremap <leader>y :!yapf<Cr>
 nmap <F9> :TagbarToggle<CR>
 let g:python_highlight_all = 1
