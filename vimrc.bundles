@@ -9,6 +9,7 @@ set nocompatible
 
 call plug#begin('~/.vim/bundle')
 
+Plug 'ervandew/supertab'
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 " 主题
 Plug 'tomasr/molokai'
@@ -46,8 +47,14 @@ Plug 'tpope/vim-fugitive'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 " Plug 'fisadev/vim-isort', {'for': 'python'}
 Plug 'vim-python/python-syntax', {'for': 'python'}
+Plug 'Rykka/riv.vim'
 Plug 'majutsushi/tagbar'
 Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'for': 'go'}
+"
+" Group dependencies, vim-snippets depends on ultisnips
+" 代码片段快速插入 (snippets中,是代码片段资源,需要学习)
+" Snippets are separated from the engine. Add this if you want them:
+Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
 call plug#end()
 
 " open a NERDTree automatically when vim starts up if no files were specified
@@ -112,7 +119,7 @@ highlight link ALEWarningSign Exception
 let g:ycm_python_binary_path = 'python'
 let g:ycm_complete_in_comments = 1  "在注释输入中也能补全
 let g:ycm_complete_in_strings = 1   "在字符串输入中也能补全
-let g:ycm_use_ultisnips_completer = 0 "提示UltiSnips
+let g:ycm_use_ultisnips_completer = 1 "提示UltiSnips
 let g:ycm_collect_identifiers_from_comments_and_strings = 1   "注释和字符串中的文字也会被收入补全
 let g:ycm_collect_identifiers_from_tags_files = 1
 " 开启语法关键字补全
@@ -125,9 +132,13 @@ nnoremap <leader>gd :YcmCompleter GoToDeclaration<CR>
 " 回车作为选中
 let g:ycm_key_list_stop_completion = ['<CR>']
 "let g:ycm_key_list_select_completion=['<c-n>']
-let g:ycm_key_list_select_completion = ['<TAB>', '<Down>', '<c-j>']
+" let g:ycm_key_list_select_completion = ['<TAB>', '<Down>', '<c-j>']
 "let g:ycm_key_list_previous_completion=['<c-p>']
-let g:ycm_key_list_previous_completion = ['<S-TAB>', '<Up>', '<c-k>']
+" let g:ycm_key_list_previous_completion = ['<S-TAB>', '<Up>', '<c-k>']
+" make YCM compatible with UltiSnips (using supertab)
+let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+let g:SuperTabDefaultCompletionType = '<C-n>'
 let g:ycm_filetype_blacklist = {
     \ 'tagbar' : 1,
     \ 'gitcommit' : 1,
@@ -314,3 +325,32 @@ function! s:build_go_files()
     call go#cmd#Build(0)
   endif
 endfunction
+
+let g:UltiSnipsExpandTrigger       = "<tab>"
+let g:UltiSnipsJumpForwardTrigger  = "<tab>"
+let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+let g:UltiSnipsSnippetDirectories  = ['UltiSnips']
+let g:UltiSnipsSnippetsDir = '~/.vim/UltiSnips'
+" 定义存放代码片段的文件夹 .vim/UltiSnips下，使用自定义和默认的，将会的到全局，有冲突的会提示
+" 进入对应filetype的snippets进行编辑
+map <leader>us :UltiSnipsEdit<CR>
+
+" ctrl+j/k 进行选择
+func! g:JInYCM()
+    if pumvisible()
+        return "\<C-n>"
+    else
+        return "\<c-j>"
+    endif
+endfunction
+
+func! g:KInYCM()
+    if pumvisible()
+        return "\<C-p>"
+    else
+        return "\<c-k>"
+    endif
+endfunction
+inoremap <c-j> <c-r>=g:JInYCM()<cr>
+au BufEnter,BufRead * exec "inoremap <silent> " . g:UltiSnipsJumpBackwordTrigger . " <C-R>=g:KInYCM()<cr>"
+let g:UltiSnipsJumpBackwordTrigger = "<c-k>"
