@@ -5,3 +5,5 @@ bundle
 configs
 myconfig.sh
 init.vim
+.netrwhist
+autoload/
