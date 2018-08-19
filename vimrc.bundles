@@ -55,6 +55,8 @@ Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries', 'for': 'go'}
 " 代码片段快速插入 (snippets中,是代码片段资源,需要学习)
 " Snippets are separated from the engine. Add this if you want them:
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+" docker
+Plug 'docker/docker' , {'rtp': '/contrib/syntax/vim/'}
 call plug#end()
 
 " open a NERDTree automatically when vim starts up if no files were specified
@@ -131,6 +133,8 @@ nnoremap <leader>jd :YcmCompleter GoToDefinitionElseDeclaration<CR>
 nnoremap <leader>gd :YcmCompleter GoToDeclaration<CR>
 " 回车作为选中
 let g:ycm_key_list_stop_completion = ['<CR>']
+" from 后面自动补全
+let g:ycm_semantic_triggers = {'python': ['re!import (.+,\s)*', 're!from\s']}
 "let g:ycm_key_list_select_completion=['<c-n>']
 " let g:ycm_key_list_select_completion = ['<TAB>', '<Down>', '<c-j>']
 "let g:ycm_key_list_previous_completion=['<c-p>']
@@ -247,6 +251,10 @@ nnoremap <leader>ge :Gdiff<CR>
 " autocmd FileType python map <leader>a :call yapf#YAPF()<cr>
 autocmd FileType python nnoremap <leader>a :0,$!yapf<Cr> :%!isort -<Cr>
 autocmd FileType python vnoremap <leader>y :!yapf<Cr>
+
+" json format
+autocmd FileType json nnoremap <leader>a :%!python -m json.tool<Cr>
+
 nmap <F9> :TagbarToggle<CR>
 let g:python_highlight_all = 1
 
