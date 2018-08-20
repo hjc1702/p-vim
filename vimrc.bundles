@@ -205,6 +205,10 @@ let g:ctrlp_extensions = ['funky']
 nmap \ <Plug>CtrlSFCwordPath<CR>
 let g:ctrlsf_auto_close = 0
 let g:ctrlsf_confirm_save = 0
+" 搜索后 focus 在搜索结果
+let g:ctrlsf_auto_focus = {
+    \ "at": "start"
+    \ }
 
 let g:rbpt_colorpairs = [
 	\ ['brown',       'RoyalBlue3'],
