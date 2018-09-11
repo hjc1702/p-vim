@@ -281,7 +281,7 @@ map <Leader>sa ggVG
 nnoremap gv `[v`]
 
 " select block
-nnoremap <leader>v V`}
+nnoremap <leader>V V`}
 
 " w!! to sudo & write a file
 cmap w!! w !sudo tee >/dev/null %
@@ -308,6 +308,7 @@ nnoremap <leader>w :w<CR>
 
 " 具体编辑文件类型的一般设置，比如不要 tab 等
 " autocmd FileType python set tabstop=4 shiftwidth=4 expandtab ai
+autocmd BufRead,BufNewFile *.vue setlocal filetype=vue.html.javascript tabstop=2 shiftwidth=2 softtabstop=2 expandtab ai
 
 
 " 保存python文件时删除多余空格
@@ -348,7 +349,7 @@ if has("autocmd")
 endif
 
 ""复制粘贴到系统
-vnoremap <leader>y "+y
+" vnoremap <leader>y "+y
 nmap <leader>v "+gp
 vmap <leader>c "+y
 
