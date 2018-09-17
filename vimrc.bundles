@@ -86,7 +86,7 @@ let g:ale_linters = {
 \}
 
 " E501 -> 120 chars
-" let g:ale_python_flake8_options="--ignore=E131 --max-line-length=120"
+let g:ale_python_flake8_options="--max-line-length=120"
 " --ignore=E225,E124,E712,E116
 
 let g:ale_sign_error = '>>'
