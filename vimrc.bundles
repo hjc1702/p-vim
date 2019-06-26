@@ -14,6 +14,10 @@ Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 " 主题
 Plug 'tomasr/molokai'
 Plug 'altercation/vim-colors-solarized'
+Plug 'lifepillar/vim-solarized8'
+Plug 'morhetz/gruvbox'
+Plug 'kristijanhusak/vim-hybrid-material'
+Plug 'junegunn/seoul256.vim'
 " 盘古插件用于自动格式化、标准化中文排版
 Plug 'hotoo/pangu.vim'
 " A solid language pack for Vim.
@@ -239,6 +243,7 @@ au Syntax * RainbowParenthesesLoadBraces
 if !exists('g:airline_symbols')
     let g:airline_symbols = {}
 endif
+let g:airline_theme = "hybrid"
 let g:airline_symbols.branch = '⎇'
 let g:airline_symbols.maxlinenr = ''
 let g:airline_powerline_fonts = 1

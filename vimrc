@@ -20,21 +20,26 @@ endif
 set background=dark
 set t_Co=256
 
-let g:solarized_visibility = "high"
-let g:solarized_contrast = "high"
+" let g:solarized_visibility = "high"
+" let g:solarized_contrast = "high"
 " let g:solarized_termcolors=16
 " colorscheme solarized8
-let g:solarized_termtrans=1
+" let g:solarized_termtrans=1
 " let g:solarized_contrast="normal"
 " let g:solarized_visibility="normal"
-colorscheme solarized
+set termguicolors
+colorscheme solarized8
+" colorscheme seoul256
+" colorscheme gruvbox
+" colorscheme hybrid_material
+" set termguicolors
 " colorscheme wombat256mod
 " colorscheme molokai
 " color dracula
 " colorscheme desert
 " colorscheme space-vim-dark
 " hi Comment cterm=italic
-" let g:airline_powerline_fonts=1
+let g:airline_powerline_fonts=1
 
 
 "设置标记一列的背景颜色和数字一行颜色一致
@@ -81,6 +86,7 @@ set title
 " 去掉输入错误的提示声音
 set novisualbell
 set noerrorbells
+set vb t_vb=
 " Remember info about open buffers on close
 set viminfo^=%
 " For regular expressions turn magic on
@@ -354,8 +360,8 @@ nmap <leader>v "+gp
 vmap <leader>c "+y
 
 set ttyfast                     " Indicate fast terminal conn for faster redraw
-set ttymouse=xterm2             " Indicate terminal type for mouse codes
-set ttyscroll=3                 " Speedup scrolling
+" set ttymouse=xterm2             " Indicate terminal type for mouse codes
+" set ttyscroll=3                 " Speedup scrolling
 set laststatus=2                " Show status line always
 set nobackup                    " Don't create annoying backup files
 set splitright                  " Vertical windows should be split to right
