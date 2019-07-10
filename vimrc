@@ -22,11 +22,8 @@ set t_Co=256
 
 " let g:solarized_visibility = "high"
 " let g:solarized_contrast = "high"
-" let g:solarized_termcolors=16
-" colorscheme solarized8
 " let g:solarized_termtrans=1
-" let g:solarized_contrast="normal"
-" let g:solarized_visibility="normal"
+" colorscheme solarized
 set termguicolors
 colorscheme solarized8
 " colorscheme seoul256
@@ -87,6 +84,7 @@ set title
 set novisualbell
 set noerrorbells
 set vb t_vb=
+au GuiEnter * set t_vb=
 " Remember info about open buffers on close
 set viminfo^=%
 " For regular expressions turn magic on
