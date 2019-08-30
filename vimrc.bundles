@@ -40,6 +40,7 @@ Plug 'tacahiroy/ctrlp-funky'
 Plug 'dyng/ctrlsf.vim'
 Plug 'majutsushi/tagbar'
 Plug 'SirVer/ultisnips'
+Plug 'tpope/vim-surround'
 call plug#end()
 " YouCompleteMe {{{
 	let g:ycm_python_binary_path = 'python'
@@ -59,7 +60,7 @@ call plug#end()
 	" from 后面自动补全
 	let g:ycm_semantic_triggers = {'python': ['re!import (.+,\s)*', 're!from\s']}
 	" make YCM compatible with UltiSnips (using supertab)
-	let g:ycm_key_list_select_completion = ['<TAB>', '<C-j>', '<Down>']
+	let g:ycm_key_list_select_completion = ['<C-j>', '<Down>']
 	let g:ycm_key_list_previous_completion = ['<S-TAB>', '<C-k>', '<Up>']
     " 引入，可以补全系统，以及 python 的第三方包 针对新老版本 YCM 做了兼容
     " old version
