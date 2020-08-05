@@ -27,7 +27,7 @@ Plug 'bronson/vim-trailing-whitespace'
 " linter
 Plug 'w0rp/ale'
 " 自动补全
-Plug 'Valloric/YouCompleteMe', {'do': './install.py --go-completer'}
+Plug 'Valloric/YouCompleteMe', {'do': 'python3 install.py --go-completer'}
 " airline
 " 状态栏增强展示
 Plug 'vim-airline/vim-airline'
