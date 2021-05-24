@@ -42,6 +42,8 @@ Plug 'dyng/ctrlsf.vim'
 Plug 'majutsushi/tagbar'
 Plug 'SirVer/ultisnips'
 Plug 'tpope/vim-surround'
+Plug 'jceb/vim-orgmode'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 call plug#end()
 " YouCompleteMe {{{
 	let g:ycm_python_binary_path = 'python'
