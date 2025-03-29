@@ -250,7 +250,7 @@ set helplang=cn
 "set langmenu=zh_CN.UTF-8
 "set enc=2byte-gb18030
 " 下面这句只影响普通模式 (非图形界面) 下的 Vim
-set termencoding=utf-8
+"set termencoding=utf-8
 
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
