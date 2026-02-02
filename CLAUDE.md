@@ -16,6 +16,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ LSP 性能优化完成，消除 "Loading workspace" 延迟
 - ✅ 项目文档已整理到 docs/ 目录
 - ✅ 移除启动时的调试信息输出，提升用户体验
+- ✅ **启动性能优化**：从 294ms 降至 111ms（提升 62%）
+- ✅ **LuaSnip 延迟加载**：只在插入模式时加载，避免启动开销
+- ✅ **格式化配置优化**：显式配置 black/isort 路径，增加超时时间
+- ✅ **禁用自动格式化**：改为手动格式化（`,a` 或 `,y`）
+- ✅ **flake8 配置完善**：添加详细注释，忽略样式相关规则
 
 ## 核心架构
 
@@ -52,7 +57,8 @@ p-vim/
 │   ├── REFACTORING-COMPLETE.md      # 重构报告
 │   ├── CLEANUP-REPORT.md            # 清理报告
 │   ├── LSP-FIX-REPORT.md            # LSP 修复报告
-│   └── LSP-PERFORMANCE-OPTIMIZATION.md  # LSP 性能优化报告
+│   ├── LSP-PERFORMANCE-OPTIMIZATION.md  # LSP 性能优化报告
+│   └── STARTUP-PERFORMANCE-OPTIMIZATION.md  # 启动性能优化报告
 ├── install-neovim.sh                # 自动安装脚本
 ├── lazy-lock.json                   # 插件版本锁定
 ├── README.md                        # 项目主页
@@ -374,7 +380,8 @@ vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
    - `gcc` 注释
    - `,jd` 跳转定义
    - `K` 查看文档
-4. 保存: `:w` (自动格式化和 lint)
+   - `,a` 手动格式化文件
+4. 保存: `:w` (自动 lint)
 5. 搜索: `\` 全局搜索
 
 ### 插件管理
@@ -395,10 +402,11 @@ vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
 
 ## 性能
 
-- **启动时间**: < 100ms
+- **启动时间**: ~111ms（已优化，原 294ms）
 - **插件数量**: 25 个（全部懒加载）
 - **内存使用**: ~50MB（空闲时）
 - **配置文件**: 14 个 Lua 文件，~2000+ 行代码
+- **性能报告**: 详见 `docs/STARTUP-PERFORMANCE-OPTIMIZATION.md`
 
 ## 故障排除
 

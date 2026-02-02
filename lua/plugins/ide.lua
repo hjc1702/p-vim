@@ -491,7 +491,9 @@ return {
   {
     "L3MON4D3/LuaSnip",
     version = "v2.*",
-    -- 不构建 jsregexp，使用纯 Lua 实现
+    build = "make install_jsregexp",
+    -- 优化：只在需要时才加载（插入模式或补全触发）
+    event = "InsertEnter",
     dependencies = { "rafamadriz/friendly-snippets" },
     config = function()
       local luasnip = require("luasnip")
@@ -503,11 +505,11 @@ return {
         enable_autosnippets = true,
       })
 
-      -- 加载 friendly-snippets
+      -- 优化：延迟加载 friendly-snippets（只加载当前文件类型）
       require("luasnip.loaders.from_vscode").lazy_load()
 
-      -- 加载自定义片段（从 snippets/ 目录）
-      require("luasnip.loaders.from_lua").load({
+      -- 优化：延迟加载自定义片段（从 snippets/ 目录）
+      require("luasnip.loaders.from_lua").lazy_load({
         paths = vim.fn.stdpath("config") .. "/snippets",
       })
 
@@ -542,7 +544,23 @@ return {
       lint.linters.flake8.args = {
         "--format=%(path)s:%(row)d:%(col)d:%(code)s:%(text)s",
         "--no-show-source",
-        "--ignore=E402,E501,E722,E731,E225,E203,E702,F811,F405,F403,W391,F401,W503,W504",
+        -- 忽略的错误代码：
+        -- E402: module level import not at top of file
+        -- E501: line too long
+        -- E722: bare except
+        -- E731: do not assign a lambda expression
+        -- E225: missing whitespace around operator
+        -- E226: missing whitespace around arithmetic operator
+        -- E203: whitespace before ':'
+        -- E702: multiple statements on one line
+        -- F811: redefinition of unused name
+        -- F405: name may be undefined (from star imports)
+        -- F403: unable to detect undefined names (from star imports)
+        -- W391: blank line at end of file
+        -- F401: module imported but unused
+        -- W503: line break before binary operator
+        -- W504: line break after binary operator
+        "--ignore=E402,E501,E722,E731,E702,F811,F405,F403,W391,F401,W503,W504",
       }
 
       -- 自动 lint
@@ -582,26 +600,47 @@ return {
           rust = { "rustfmt" },
         },
 
+        -- 显式配置格式化器路径和选项
+        formatters = {
+          black = {
+            command = vim.fn.stdpath("data") .. "/mason/bin/black",
+            args = {
+              "--fast",  -- 更快的格式化
+              "--quiet", -- 减少输出
+              "-",
+            },
+          },
+          isort = {
+            command = vim.fn.stdpath("data") .. "/mason/bin/isort",
+            args = {
+              "--profile", "black",  -- 与 black 兼容
+              "--quiet",
+              "-",
+            },
+          },
+        },
+
         -- 格式化选项
-        format_on_save = function(bufnr)
-          -- 同步格式化，避免保存不完整的内容
-          -- 增加 timeout 以处理大文件
-          return {
-            timeout_ms = 2000,
-            lsp_fallback = true,
-            async = false,
-          }
-        end,
+        -- 禁用保存时自动格式化，使用快捷键手动格式化（,a 或 ,y）
+        format_on_save = nil,
       })
 
       -- Python 格式化快捷键（,a）（来自 vimrc.bundles 第 368 行）
       vim.keymap.set("n", "<leader>a", function()
-        require("conform").format({ async = true, lsp_fallback = true })
+        require("conform").format({
+          async = true,
+          timeout_ms = 10000,  -- 手动格式化给更长时间
+          lsp_fallback = true
+        })
       end, { desc = "Format file" })
 
       -- Visual 模式格式化（,y）
       vim.keymap.set("v", "<leader>y", function()
-        require("conform").format({ async = true, lsp_fallback = true })
+        require("conform").format({
+          async = true,
+          timeout_ms = 10000,
+          lsp_fallback = true
+        })
       end, { desc = "Format selection" })
     end,
   },
