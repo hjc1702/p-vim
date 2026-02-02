@@ -15,6 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ LSP 自动启动机制已修复，包括新文件支持
 - ✅ LSP 性能优化完成，消除 "Loading workspace" 延迟
 - ✅ 项目文档已整理到 docs/ 目录
+- ✅ 移除启动时的调试信息输出，提升用户体验
 
 ## 核心架构
 

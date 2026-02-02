@@ -55,4 +55,4 @@ end, {})
 -- 快捷键：<leader>ld 运行诊断
 vim.keymap.set("n", "<leader>ld", "<cmd>LspDebug<cr>", { desc = "LSP Debug Info" })
 
-print("✓ LSP 调试功能已加载。运行 :LspDebug 或按 ,ld 查看诊断信息")
+-- print("✓ LSP 调试功能已加载。运行 :LspDebug 或按 ,ld 查看诊断信息")
