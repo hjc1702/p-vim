@@ -30,6 +30,13 @@ LSP 修复报告 - LSP 配置问题的完整排查和解决过程，包括：
 - 调试工具
 - 经验总结
 
+### [LSP-PERFORMANCE-OPTIMIZATION.md](./LSP-PERFORMANCE-OPTIMIZATION.md)
+LSP 性能优化报告 - LSP 启动性能优化的详细过程，包括：
+- "Loading workspace" 问题分析
+- lua_ls 和 pyright 配置优化
+- 性能对比和效果验证
+- 配置建议和排查方法
+
 ## 🔗 其他文档
 
 - **[../README.md](../README.md)** - 项目主页和快速开始

@@ -13,6 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ 移除了 YouCompleteMe、vim-go 等旧插件
 - ✅ 使用 nvim-lspconfig + Mason 提供 LSP 支持
 - ✅ LSP 自动启动机制已修复，包括新文件支持
+- ✅ LSP 性能优化完成，消除 "Loading workspace" 延迟
 - ✅ 项目文档已整理到 docs/ 目录
 
 ## 核心架构
@@ -49,7 +50,8 @@ p-vim/
 │   ├── MIGRATION-SUMMARY.md         # 迁移总结
 │   ├── REFACTORING-COMPLETE.md      # 重构报告
 │   ├── CLEANUP-REPORT.md            # 清理报告
-│   └── LSP-FIX-REPORT.md            # LSP 修复报告
+│   ├── LSP-FIX-REPORT.md            # LSP 修复报告
+│   └── LSP-PERFORMANCE-OPTIMIZATION.md  # LSP 性能优化报告
 ├── install-neovim.sh                # 自动安装脚本
 ├── lazy-lock.json                   # 插件版本锁定
 ├── README.md                        # 项目主页

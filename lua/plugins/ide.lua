@@ -14,7 +14,8 @@ return {
       progress = {
         display = {
           render_limit = 16,
-          done_ttl = 3,
+          -- 优化：加快进度消息消失速度
+          done_ttl = 1,
           done_icon = "✓",
         },
       },
@@ -108,7 +109,8 @@ return {
   -- ==========================================
   {
     "neovim/nvim-lspconfig",
-    event = { "BufReadPre", "BufNewFile" },
+    -- 优化：延迟加载，只在真正编辑文件时才启动 LSP
+    event = { "BufReadPost", "BufNewFile" },
     dependencies = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
@@ -220,7 +222,8 @@ return {
               typeCheckingMode = "off",
               autoSearchPaths = true,
               useLibraryCodeForTypes = true,
-              diagnosticMode = "workspace",
+              -- 优化：只检查打开的文件，避免扫描整个工作区
+              diagnosticMode = "openFilesOnly",
             },
           },
         },
@@ -241,7 +244,11 @@ return {
               globals = { "vim" },
             },
             workspace = {
-              library = vim.api.nvim_get_runtime_file("", true),
+              -- 优化：只加载必要的 Vim API 文件，大幅减少索引时间
+              library = {
+                vim.env.VIMRUNTIME .. "/lua",
+                vim.fn.stdpath("config") .. "/lua",
+              },
               checkThirdParty = false,
             },
             telemetry = {
