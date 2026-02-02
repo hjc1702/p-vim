@@ -75,4 +75,9 @@ require("lazy").setup({
     enabled = true,
     notify = false,
   },
+
+  -- 禁用 luarocks 支持（当前配置不需要）
+  rocks = {
+    enabled = false,
+  },
 })

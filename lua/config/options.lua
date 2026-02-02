@@ -7,6 +7,22 @@ local opt = vim.opt
 local g = vim.g
 
 -- ==========================================
+-- 禁用不需要的远程插件提供者
+-- ==========================================
+
+-- 禁用 Node.js provider（如不使用 Node.js 插件）
+g.loaded_node_provider = 0
+
+-- 禁用 Perl provider（如不使用 Perl 插件）
+g.loaded_perl_provider = 0
+
+-- 禁用 Ruby provider（如不使用 Ruby 插件）
+g.loaded_ruby_provider = 0
+
+-- Python provider 保持启用（用于部分插件）
+-- g.loaded_python3_provider = 0  -- 如需禁用可取消注释
+
+-- ==========================================
 -- 环境变量设置
 -- ==========================================
 
