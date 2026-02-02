@@ -98,7 +98,7 @@
 
 # 安装外部依赖
 brew install neovim ripgrep fd
-brew install --cask font-hack-nerd-font
+brew install --cask font-maple-mono-nf-cn
 pip3 install pynvim flake8 yapf isort
 npm install -g pyright
 ```

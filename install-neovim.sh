@@ -6,6 +6,13 @@
 
 set -e  # 遇到错误立即退出
 
+# 禁用 zsh 特殊功能以避免干扰
+export DISABLE_AUTO_UPDATE=true
+export DISABLE_UPDATE_PROMPT=true
+
+# 错误处理
+trap 'echo ""; echo "脚本执行出错，请检查上面的错误信息"; exit 1' ERR
+
 BASEDIR=$(dirname "$0")
 cd "$BASEDIR" || exit 1
 CURRENT_DIR=$(pwd)
@@ -91,7 +98,7 @@ install_neovim() {
     print_header "检查 Neovim"
 
     if command_exists nvim; then
-        NVIM_VERSION=$(nvim --version | head -n1 | grep -oP '\d+\.\d+\.\d+')
+        NVIM_VERSION=$(nvim --version | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
         print_success "Neovim 已安装 (版本 $NVIM_VERSION)"
 
         # 检查版本是否 >= 0.10.0
@@ -180,36 +187,38 @@ install_python_tools() {
 install_nerd_font() {
     print_header "安装 Nerd Font"
 
-    print_info "Nerd Font 用于显示图标，建议安装"
-    read -p "是否安装 Nerd Font? (y/n) " -n 1 -r
+    print_info "Maple Font 用于显示图标，建议安装"
+    read -p "是否安装 Maple Mono NF CN? (y/n) " -n 1 -r
     echo
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         if [[ "$OS" == "macos" ]]; then
             # macOS 使用 Homebrew Cask
-            if ! brew list --cask font-hack-nerd-font >/dev/null 2>&1; then
-                print_info "安装 Hack Nerd Font..."
-                brew tap homebrew/cask-fonts
-                brew install --cask font-hack-nerd-font
-                print_success "Hack Nerd Font 安装完成"
-                print_warning "请在终端设置中将字体改为 'Hack Nerd Font'"
+            if ! brew list --cask font-maple-mono-nf-cn >/dev/null 2>&1; then
+                print_info "安装 Maple Mono NF CN..."
+                brew install --cask font-maple-mono-nf-cn
+                print_success "Maple Mono NF CN 安装完成"
+                print_warning "请在终端设置中将字体改为 'Maple Mono NF CN'"
             else
-                print_success "Hack Nerd Font 已安装"
+                print_success "Maple Mono NF CN 已安装"
             fi
         elif [[ "$OS" == "linux" ]]; then
             # Linux 手动安装
-            print_info "下载 Hack Nerd Font..."
+            print_info "下载 Maple Mono NF CN..."
             mkdir -p ~/.local/share/fonts
             cd ~/.local/share/fonts
 
-            if [ ! -f "Hack Regular Nerd Font Complete.ttf" ]; then
-                curl -fLo "Hack Regular Nerd Font Complete.ttf" \
-                    https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Hack/Regular/HackNerdFont-Regular.ttf
+            if [ ! -d "maple-font" ]; then
+                print_info "从 GitHub 下载最新版本..."
+                LATEST_RELEASE=$(curl -s https://api.github.com/repos/subframe7536/maple-font/releases/latest | grep "browser_download_url.*MapleMono-NF-CN.zip" | cut -d '"' -f 4)
+                curl -fLo MapleMono-NF-CN.zip "$LATEST_RELEASE"
+                unzip -q MapleMono-NF-CN.zip -d maple-font
+                rm MapleMono-NF-CN.zip
                 fc-cache -fv
-                print_success "Hack Nerd Font 安装完成"
-                print_warning "请在终端设置中将字体改为 'Hack Nerd Font'"
+                print_success "Maple Mono NF CN 安装完成"
+                print_warning "请在终端设置中将字体改为 'Maple Mono NF CN'"
             else
-                print_success "Hack Nerd Font 已安装"
+                print_success "Maple Mono NF CN 已安装"
             fi
 
             cd "$CURRENT_DIR"
@@ -262,11 +271,13 @@ install_plugins() {
     print_info "这可能需要几分钟时间"
     echo ""
 
-    # 使用 headless 模式安装插件
+    # 使用 headless 模式安装插件，重定向输出避免干扰
     print_info "正在安装插件..."
-    nvim --headless "+Lazy! sync" +qa
-
-    print_success "插件安装完成"
+    if nvim --headless "+Lazy! sync" +qa 2>/dev/null; then
+        print_success "插件安装完成"
+    else
+        print_warning "插件安装可能出现问题，但可以在首次启动 nvim 时自动完成"
+    fi
 }
 
 # 主安装流程
@@ -306,22 +317,22 @@ main() {
     echo "下一步："
     echo ""
     echo "1. 启动 Neovim:"
-    echo "   ${BLUE}nvim${NC}"
+    echo -e "   ${BLUE}nvim${NC}"
     echo ""
     echo "2. 检查健康状态:"
-    echo "   ${BLUE}:checkhealth${NC}"
+    echo -e "   ${BLUE}:checkhealth${NC}"
     echo ""
     echo "3. Mason 会自动安装 LSP 服务器，也可以手动查看:"
-    echo "   ${BLUE}:Mason${NC}"
+    echo -e "   ${BLUE}:Mason${NC}"
     echo ""
     echo "4. 尝试新功能:"
     echo "   - 打开 Python 文件测试 LSP"
-    echo "   - 按 ${BLUE},${NC} 查看快捷键提示"
-    echo "   - 按 ${BLUE}s${NC} 快速跳转"
-    echo "   - 按 ${BLUE},xx${NC} 查看诊断列表"
+    echo -e "   - 按 ${BLUE},${NC} 查看快捷键提示"
+    echo -e "   - 按 ${BLUE}s${NC} 快速跳转"
+    echo -e "   - 按 ${BLUE},xx${NC} 查看诊断列表"
     echo ""
     echo -e "${YELLOW}提示：${NC}"
-    echo "- 如果终端图标显示不正常，请确保使用 Nerd Font"
+    echo "- 如果终端图标显示不正常，请确保使用 Maple Mono NF CN 字体"
     echo "- 首次使用时 Mason 会在后台安装工具，请稍等片刻"
     echo ""
     echo -e "${BLUE}=========================================="
@@ -329,10 +340,15 @@ main() {
     echo -e "==========================================${NC}"
     echo ""
     echo "如果需要回滚到旧配置："
-    echo "   ${BLUE}rm ~/.config/nvim${NC}"
-    echo "   ${BLUE}mv ~/.config/nvim.backup.* ~/.config/nvim${NC}"
+    echo -e "   ${BLUE}rm ~/.config/nvim${NC}"
+    echo -e "   ${BLUE}mv ~/.config/nvim.backup.* ~/.config/nvim${NC}"
     echo ""
+
+    # 清理并正常退出
+    cd "$HOME" || true
+    exit 0
 }
 
 # 运行主程序
+main "$@"
 main

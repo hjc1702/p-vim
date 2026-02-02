@@ -91,6 +91,10 @@ opt.wrap = false
 opt.showmatch = true
 opt.matchtime = 2
 
+-- GUI 字体设置（仅对 GUI 版本生效，如 Neovide）
+-- 终端版本需要在终端设置中修改字体
+opt.guifont = "Maple Mono NF CN:h14"
+
 -- ==========================================
 -- 搜索设置
 -- ==========================================

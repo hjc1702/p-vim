@@ -66,7 +66,7 @@ sudo apt install ripgrep fd-find nodejs python3 python3-pip  # Ubuntu
 pip3 install --user flake8 black isort
 
 # 4. 安装 Nerd Font
-brew install --cask font-hack-nerd-font  # macOS
+brew install --cask font-maple-mono-nf-cn  # macOS
 
 # 5. 克隆配置并创建软链接
 git clone https://github.com/hjc1702/p-vim.git ~/.config/nvim
