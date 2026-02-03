@@ -174,7 +174,14 @@ return {
     build = ":TSUpdate",
     event = { "BufReadPost", "BufNewFile" },
     config = function()
-      require("nvim-treesitter.configs").setup({
+      -- 添加错误保护，防止插件未安装时报错
+      local ok, treesitter_configs = pcall(require, "nvim-treesitter.configs")
+      if not ok then
+        vim.notify("nvim-treesitter not installed yet, skipping configuration", vim.log.levels.WARN)
+        return
+      end
+
+      treesitter_configs.setup({
         -- 安装的语言解析器
         ensure_installed = {
           "lua",
@@ -231,6 +238,13 @@ return {
     "HiPhish/rainbow-delimiters.nvim",
     event = { "BufReadPost", "BufNewFile" },
     config = function()
+      -- 添加错误保护，防止插件未安装时报错
+      local ok, rainbow_delimiters = pcall(require, "rainbow-delimiters")
+      if not ok then
+        vim.notify("rainbow-delimiters not installed yet, skipping configuration", vim.log.levels.WARN)
+        return
+      end
+
       -- 设置彩虹括号颜色（Solarized Dark 主题适配）
       vim.api.nvim_set_hl(0, "RainbowDelimiterRed", { fg = "#dc322f" })
       vim.api.nvim_set_hl(0, "RainbowDelimiterYellow", { fg = "#b58900" })
@@ -239,8 +253,6 @@ return {
       vim.api.nvim_set_hl(0, "RainbowDelimiterGreen", { fg = "#859900" })
       vim.api.nvim_set_hl(0, "RainbowDelimiterViolet", { fg = "#6c71c4" })
       vim.api.nvim_set_hl(0, "RainbowDelimiterCyan", { fg = "#2aa198" })
-
-      local rainbow_delimiters = require("rainbow-delimiters")
 
       require("rainbow-delimiters.setup").setup({
         strategy = {
