@@ -143,7 +143,7 @@ install_dependencies() {
 
     if [[ "$OS" == "macos" ]]; then
         # macOS 使用 Homebrew
-        deps+=("ripgrep" "fd" "node" "python3")
+        deps+=("ripgrep" "fd" "node" "python3" "tree-sitter")
 
         for dep in "${deps[@]}"; do
             if ! command_exists "$dep"; then
@@ -166,6 +166,19 @@ install_dependencies() {
             sudo pacman -S --noconfirm git curl wget ripgrep fd nodejs npm python python-pip
         fi
         print_success "依赖工具安装完成"
+
+        # 在 Linux 上通过 npm 安装 tree-sitter-cli（如果未安装）
+        if ! command_exists tree-sitter; then
+            if command_exists npm; then
+                print_info "通过 npm 安装 tree-sitter-cli..."
+                sudo npm install -g tree-sitter-cli
+                print_success "tree-sitter-cli 安装完成"
+            else
+                print_warning "npm 未找到，无法安装 tree-sitter-cli"
+            fi
+        else
+            print_success "tree-sitter 已安装"
+        fi
     fi
 }
 
@@ -173,13 +186,45 @@ install_dependencies() {
 install_python_tools() {
     print_header "安装 Python 工具"
 
-    if command_exists pip3; then
-        print_info "安装 Python linting/formatting 工具..."
-        pip3 install --user --upgrade pip
-        pip3 install --user flake8 black isort
-        print_success "Python 工具安装完成"
+    # 检查并安装 pipx
+    if ! command_exists pipx; then
+        print_info "安装 pipx..."
+        if [[ "$OS" == "macos" ]]; then
+            brew install pipx
+            pipx ensurepath
+        elif [[ "$OS" == "linux" ]]; then
+            if command_exists pip3; then
+                python3 -m pip install --user pipx
+                python3 -m pipx ensurepath
+            else
+                print_warning "pip3 未找到，跳过 Python 工具安装"
+                return
+            fi
+        fi
+        print_success "pipx 安装完成"
     else
-        print_warning "pip3 未找到，跳过 Python 工具安装"
+        print_success "pipx 已安装"
+    fi
+
+    # 使用 pipx 安装 Python 工具
+    if command_exists pipx; then
+        print_info "安装 Python linting/formatting 工具..."
+
+        local tools=("flake8" "black" "isort")
+        for tool in "${tools[@]}"; do
+            if pipx list | grep -q "^  package $tool"; then
+                print_success "$tool 已安装"
+            else
+                print_info "安装 $tool..."
+                pipx install "$tool" >/dev/null 2>&1 || print_warning "$tool 安装失败"
+                print_success "$tool 安装完成"
+            fi
+        done
+
+        print_success "Python 工具安装完成"
+        print_info "工具路径: ~/.local/bin (已添加到 PATH)"
+    else
+        print_warning "pipx 未找到，跳过 Python 工具安装"
     fi
 }
 
