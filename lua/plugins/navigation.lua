@@ -73,13 +73,6 @@ return {
           enable = true,
           ignore = false,
         },
-
-        -- 自动关闭（类似 NERDTree 的行为）
-        actions = {
-          open_file = {
-            quit_on_open = false,
-          },
-        },
       })
 
       -- 当只剩 nvim-tree 窗口时自动关闭（类似 NERDTree）
@@ -118,18 +111,18 @@ return {
       -- 最近文件（替代 CtrlP MRU）
       { "<leader>f", "<cmd>Telescope oldfiles<CR>", desc = "Recent files" },
 
-      -- 函数/符号导航（替代 CtrlP-Funky）
-      { "<leader>fu", "<cmd>Telescope lsp_document_symbols<CR>", desc = "Document symbols" },
+      -- 函数/符号导航（Treesitter）
+      { "<leader>fu", "<cmd>Telescope treesitter<CR>", desc = "Document symbols (Treesitter)" },
 
-      -- 光标下单词的函数导航
+      -- 光标下单词的函数导航（Treesitter）
       {
         "<leader>fU",
         function()
-          require("telescope.builtin").lsp_document_symbols({
+          require("telescope.builtin").treesitter({
             default_text = vim.fn.expand("<cword>")
           })
         end,
-        desc = "Symbols under cursor"
+        desc = "Symbols under cursor (Treesitter)"
       },
 
       -- 全局搜索（替代 CtrlSF）
@@ -374,8 +367,6 @@ return {
     keys = {
       { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
       { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
-      { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
-      { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Definitions / references / ... (Trouble)" },
       { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
       { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" },
     },

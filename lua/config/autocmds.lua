@@ -10,6 +10,9 @@
 vim.api.nvim_create_autocmd("InsertEnter", {
   pattern = "*",
   callback = function()
+    if vim.g.auto_relativenumber == false then
+      return
+    end
     vim.opt.relativenumber = false
     vim.opt.number = true
   end,
@@ -19,6 +22,9 @@ vim.api.nvim_create_autocmd("InsertEnter", {
 vim.api.nvim_create_autocmd("InsertLeave", {
   pattern = "*",
   callback = function()
+    if vim.g.auto_relativenumber == false then
+      return
+    end
     vim.opt.relativenumber = true
   end,
 })
@@ -54,7 +60,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "*.md", "*.mkd", "*.markdown" },
   callback = function()
-    vim.bo.filetype = "markdown.mkd"
+    vim.bo.filetype = "markdown"
   end,
 })
 
@@ -62,7 +68,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = "*.vue",
   callback = function()
-    vim.bo.filetype = "vue.html.javascript"
+    vim.bo.filetype = "vue"
     vim.opt_local.tabstop = 2
     vim.opt_local.shiftwidth = 2
     vim.opt_local.softtabstop = 2
@@ -136,23 +142,11 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 })
 
 -- ==========================================
--- 高亮关键字（TODO, FIXME 等）
--- ==========================================
-
-vim.api.nvim_create_autocmd("Syntax", {
-  pattern = "*",
-  callback = function()
-    vim.fn.matchadd("Todo", [[\W\zs\(TODO\|FIXME\|CHANGED\|DONE\|XXX\|BUG\|HACK\)]])
-    vim.fn.matchadd("Debug", [[\W\zs\(NOTE\|INFO\|IDEA\|NOTICE\)]])
-  end,
-})
-
--- ==========================================
 -- Quickfix 窗口配置
 -- ==========================================
 
-vim.api.nvim_create_autocmd("BufReadPost", {
-  pattern = "quickfix",
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "qf",
   callback = function()
     vim.keymap.set('n', '<CR>', '<CR>', { buffer = true, noremap = true })
     vim.keymap.set('n', 'v', '<C-w><Enter><C-w>L', { buffer = true, noremap = true })

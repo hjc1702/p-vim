@@ -33,10 +33,12 @@ return {
         },
       })
 
-      -- 与 nvim-cmp 集成
-      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-      local cmp = require("cmp")
-      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+      -- 与 nvim-cmp 集成（若未安装则跳过）
+      local ok_cmp, cmp = pcall(require, "cmp")
+      if ok_cmp then
+        local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+        cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+      end
     end,
   },
 

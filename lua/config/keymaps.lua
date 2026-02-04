@@ -158,5 +158,4 @@ keymap('x', '<leader>c<space>', 'gc', { remap = true, desc = "Comment toggle (vi
 -- 例如：
 -- - <leader>n : NvimTree toggle (在 plugins/navigation.lua)
 -- - <leader>p : Telescope find_files (在 plugins/navigation.lua)
--- - <leader>jd : LSP goto definition (在 plugins/ide.lua)
 -- - gcc : Comment toggle (在 plugins/editing.lua)

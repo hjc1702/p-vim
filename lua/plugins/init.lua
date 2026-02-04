@@ -22,7 +22,8 @@ require("lazy").setup({
   { import = "plugins.ui" },           -- 界面插件（主题、状态栏、高亮）
   { import = "plugins.navigation" },   -- 导航插件（文件树、搜索、跳转）
   { import = "plugins.editing" },      -- 编辑增强插件
-  { import = "plugins.ide" },          -- IDE 功能（LSP、补全、Linting）
+  { import = "plugins.cmp" },          -- 补全
+  { import = "plugins.snippets" },     -- 代码片段
   { import = "plugins.integration" },  -- 集成插件（tmux、orgmode）
 }, {
   -- lazy.nvim 配置选项

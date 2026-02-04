@@ -1,51 +1,37 @@
 # 项目文档
 
-本目录包含 p-vim 项目的详细文档。
+本目录包含 p-vim 项目的详细文档与历史记录。
+
+> 说明：当前版本已移除 LSP / Lint / Format / Mason。部分文档为历史参考，已标记“已归档”。
 
 ## 📚 文档列表
 
-### [MIGRATION-SUMMARY.md](./MIGRATION-SUMMARY.md)
-迁移总结 - 从旧的 Vim + Vim-plug 配置迁移到 Neovim + lazy.nvim 的完整过程，包括：
-- 插件替换方案
-- 功能保留清单
-- 性能对比
+### [INSTALLATION-GUIDE.md](./INSTALLATION-GUIDE.md)
+安装指南（当前版本适用）。
 
-### [REFACTORING-COMPLETE.md](./REFACTORING-COMPLETE.md)
-重构完成报告 - 重构工作的最终总结，包括：
-- 完成的工作清单
-- 功能验证状态
-- 测试清单
-- 下一步操作建议
+### [STARTUP-PERFORMANCE-OPTIMIZATION.md](./STARTUP-PERFORMANCE-OPTIMIZATION.md)
+启动性能优化记录（含 LuaSnip / nvim-cmp 延迟加载经验）。
 
-### [CLEANUP-REPORT.md](./CLEANUP-REPORT.md)
-清理报告 - 项目文件清理的详细记录，包括：
-- 删除的文件和目录
-- 清理前后对比
-- 项目体积优化
+### [MIGRATION-SUMMARY.md](./MIGRATION-SUMMARY.md) （已归档）
+迁移总结（包含 LSP/Mason 历史内容，仅供参考）。
 
-### [LSP-FIX-REPORT.md](./LSP-FIX-REPORT.md)
-LSP 修复报告 - LSP 配置问题的完整排查和解决过程，包括：
-- 问题分析
-- 解决方案
-- 调试工具
-- 经验总结
+### [REFACTORING-COMPLETE.md](./REFACTORING-COMPLETE.md) （已归档）
+重构完成报告（包含 LSP 相关历史内容，仅供参考）。
 
-### [LSP-PERFORMANCE-OPTIMIZATION.md](./LSP-PERFORMANCE-OPTIMIZATION.md)
-LSP 性能优化报告 - LSP 启动性能优化的详细过程，包括：
-- "Loading workspace" 问题分析
-- lua_ls 和 pyright 配置优化
-- 性能对比和效果验证
-- 配置建议和排查方法
+### [CLEANUP-REPORT.md](./CLEANUP-REPORT.md) （已归档）
+清理报告（历史记录，部分内容与当前状态不一致）。
+
+### [LSP-FIX-REPORT.md](./LSP-FIX-REPORT.md) （已归档）
+LSP 修复报告（历史参考）。
+
+### [LSP-PERFORMANCE-OPTIMIZATION.md](./LSP-PERFORMANCE-OPTIMIZATION.md) （已归档）
+LSP 性能优化报告（历史参考）。
+
+### [VIRTUAL-ENV-GUIDE.md](./VIRTUAL-ENV-GUIDE.md) （已归档）
+虚拟环境与 LSP 配置指南（历史参考）。
 
 ## 🔗 其他文档
 
 - **[../README.md](../README.md)** - 项目主页和快速开始
 - **[../CLAUDE.md](../CLAUDE.md)** - 完整使用文档和配置指南
 
-## 📝 文档更新
-
-这些文档记录了项目从旧配置到新配置的完整演进过程，适合用于：
-- 了解项目历史
-- 排查类似问题
-- 参考配置方案
-- 学习 Neovim 配置

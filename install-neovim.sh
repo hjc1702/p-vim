@@ -1,399 +1,332 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ==========================================
-# Neovim 完整安装脚本
-# 自动检测系统并安装所有依赖
+# p-vim 一键安装脚本（新电脑可直接使用）
 # ==========================================
 
-set -e  # 遇到错误立即退出
+set -Eeuo pipefail
 
-# 禁用 zsh 特殊功能以避免干扰
 export DISABLE_AUTO_UPDATE=true
 export DISABLE_UPDATE_PROMPT=true
 
-# 错误处理
-trap 'echo ""; echo "脚本执行出错，请检查上面的错误信息"; exit 1' ERR
+trap 'echo; echo "脚本执行失败，请检查上面的报错信息。"; exit 1' ERR
 
-BASEDIR=$(dirname "$0")
-cd "$BASEDIR" || exit 1
-CURRENT_DIR=$(pwd)
+BASEDIR="$(cd -- "$(dirname -- "$0")" && pwd)"
+CURRENT_DIR="$BASEDIR"
 
-# 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# 打印函数
+OS=""
+DISTRO=""
+PKG_INSTALL=""
+PKG_UPDATE=""
+
 print_header() {
-    echo ""
-    echo -e "${BLUE}=========================================="
-    echo -e "$1"
-    echo -e "==========================================${NC}"
-    echo ""
+  echo
+  echo -e "${BLUE}=========================================="
+  echo -e "$1"
+  echo -e "==========================================${NC}"
+  echo
 }
 
-print_success() {
-    echo -e "${GREEN}✓${NC} $1"
-}
+print_success() { echo -e "${GREEN}✓${NC} $1"; }
+print_warning() { echo -e "${YELLOW}⚠${NC}  $1"; }
+print_error() { echo -e "${RED}✗${NC} $1"; }
+print_info() { echo -e "${BLUE}ℹ${NC}  $1"; }
 
-print_error() {
-    echo -e "${RED}✗${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}⚠${NC}  $1"
-}
-
-print_info() {
-    echo -e "${BLUE}ℹ${NC}  $1"
-}
-
-# 检测操作系统
-detect_os() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        OS="macos"
-        print_info "检测到 macOS"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        OS="linux"
-        if [ -f /etc/os-release ]; then
-            . /etc/os-release
-            DISTRO=$ID
-            print_info "检测到 Linux ($DISTRO)"
-        fi
-    else
-        print_error "不支持的操作系统: $OSTYPE"
-        exit 1
-    fi
-}
-
-# 检查命令是否存在
 command_exists() {
-    command -v "$1" >/dev/null 2>&1
+  command -v "$1" >/dev/null 2>&1
 }
 
-# 安装包管理器
-install_package_manager() {
-    if [[ "$OS" == "macos" ]]; then
-        if ! command_exists brew; then
-            print_info "安装 Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            print_success "Homebrew 安装完成"
-        else
-            print_success "Homebrew 已安装"
-        fi
-    elif [[ "$OS" == "linux" ]]; then
-        if [[ "$DISTRO" == "ubuntu" ]] || [[ "$DISTRO" == "debian" ]]; then
-            print_info "使用 apt 包管理器"
-        elif [[ "$DISTRO" == "fedora" ]] || [[ "$DISTRO" == "rhel" ]] || [[ "$DISTRO" == "centos" ]]; then
-            print_info "使用 dnf/yum 包管理器"
-        elif [[ "$DISTRO" == "arch" ]] || [[ "$DISTRO" == "manjaro" ]]; then
-            print_info "使用 pacman 包管理器"
-        fi
+confirm() {
+  local prompt="$1"
+  local default_yes="${2:-false}"
+  local answer
+  if [[ "$default_yes" == "true" ]]; then
+    read -r -p "$prompt [Y/n] " answer || true
+    [[ -z "$answer" || "$answer" =~ ^[Yy]$ ]]
+  else
+    read -r -p "$prompt [y/N] " answer || true
+    [[ "$answer" =~ ^[Yy]$ ]]
+  fi
+}
+
+ensure_brew_in_path() {
+  if [[ -x "/opt/homebrew/bin/brew" ]]; then
+    export PATH="/opt/homebrew/bin:$PATH"
+  elif [[ -x "/usr/local/bin/brew" ]]; then
+    export PATH="/usr/local/bin:$PATH"
+  fi
+}
+
+detect_os() {
+  if [[ "$OSTYPE" == darwin* ]]; then
+    OS="macos"
+    print_info "检测到 macOS"
+    return
+  fi
+
+  if [[ "$OSTYPE" == linux-gnu* ]]; then
+    OS="linux"
+    if [[ -f /etc/os-release ]]; then
+      # shellcheck source=/etc/os-release
+      . /etc/os-release
+      DISTRO="${ID:-unknown}"
+    else
+      DISTRO="unknown"
     fi
+    print_info "检测到 Linux (${DISTRO})"
+    return
+  fi
+
+  print_error "不支持的操作系统: $OSTYPE"
+  exit 1
 }
 
-# 安装 Neovim
+setup_package_manager() {
+  if [[ "$OS" == "macos" ]]; then
+    ensure_brew_in_path
+    if ! command_exists brew; then
+      print_info "安装 Homebrew..."
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      ensure_brew_in_path
+    fi
+    if ! command_exists brew; then
+      print_error "Homebrew 安装失败，请手动安装后重试。"
+      exit 1
+    fi
+    print_success "Homebrew 可用"
+    return
+  fi
+
+  case "$DISTRO" in
+    ubuntu|debian)
+      PKG_UPDATE="sudo apt update"
+      PKG_INSTALL="sudo apt install -y"
+      ;;
+    fedora|rhel|centos)
+      PKG_UPDATE="sudo dnf makecache"
+      PKG_INSTALL="sudo dnf install -y"
+      ;;
+    arch|manjaro)
+      PKG_UPDATE="sudo pacman -Sy"
+      PKG_INSTALL="sudo pacman -S --noconfirm"
+      ;;
+    *)
+      print_error "暂不支持此 Linux 发行版: ${DISTRO}"
+      print_info "请手动安装: neovim git curl ripgrep fd node python3 make gcc"
+      exit 1
+      ;;
+  esac
+
+  print_success "包管理器已就绪"
+}
+
+version_ge() {
+  local current="$1"
+  local required="$2"
+  [[ "$(printf '%s\n' "$required" "$current" | sort -V | head -n1)" == "$required" ]]
+}
+
 install_neovim() {
-    print_header "检查 Neovim"
+  print_header "检查 Neovim"
 
-    if command_exists nvim; then
-        NVIM_VERSION=$(nvim --version | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-        print_success "Neovim 已安装 (版本 $NVIM_VERSION)"
+  local need_install="false"
 
-        # 检查版本是否 >= 0.10.0
-        REQUIRED_VERSION="0.10.0"
-        if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$NVIM_VERSION" | sort -V | head -n1)" = "$REQUIRED_VERSION" ]; then
-            print_success "Neovim 版本满足要求 (>= 0.10.0)"
-        else
-            print_warning "Neovim 版本过低，建议升级到 0.10.0 或更高"
-            read -p "是否升级 Neovim? (y/n) " -n 1 -r
-            echo
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                UPGRADE_NVIM=true
-            fi
-        fi
-    else
-        print_info "Neovim 未安装，开始安装..."
-        INSTALL_NVIM=true
+  if command_exists nvim; then
+    local ver
+    ver="$(nvim --version | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+    print_success "Neovim 已安装 (版本 ${ver})"
+    if ! version_ge "$ver" "0.10.0"; then
+      print_warning "Neovim 版本低于 0.10.0，建议升级。"
+      if confirm "是否升级 Neovim？" true; then
+        need_install="true"
+      fi
     fi
+  else
+    need_install="true"
+  fi
 
-    if [[ "$INSTALL_NVIM" == true ]] || [[ "$UPGRADE_NVIM" == true ]]; then
-        if [[ "$OS" == "macos" ]]; then
-            brew install neovim
-        elif [[ "$OS" == "linux" ]]; then
-            if [[ "$DISTRO" == "ubuntu" ]] || [[ "$DISTRO" == "debian" ]]; then
-                sudo apt update
-                sudo apt install -y neovim
-            elif [[ "$DISTRO" == "fedora" ]] || [[ "$DISTRO" == "rhel" ]]; then
-                sudo dnf install -y neovim
-            elif [[ "$DISTRO" == "arch" ]] || [[ "$DISTRO" == "manjaro" ]]; then
-                sudo pacman -S --noconfirm neovim
-            fi
-        fi
-        print_success "Neovim 安装完成"
-    fi
+  if [[ "$need_install" != "true" ]]; then
+    return
+  fi
+
+  print_info "安装/升级 Neovim..."
+  if [[ "$OS" == "macos" ]]; then
+    brew install neovim || brew upgrade neovim
+  else
+    eval "$PKG_UPDATE"
+    eval "$PKG_INSTALL neovim"
+  fi
+
+  print_success "Neovim 安装完成"
 }
 
-# 安装基础依赖
 install_dependencies() {
-    print_header "安装依赖工具"
+  print_header "安装依赖工具"
 
-    local deps=("git" "curl" "wget")
+  if [[ "$OS" == "macos" ]]; then
+    local deps=(git curl wget ripgrep fd node python3 make)
+    for dep in "${deps[@]}"; do
+      if command_exists "$dep"; then
+        print_success "$dep 已安装"
+      else
+        print_info "安装 $dep..."
+        brew install "$dep"
+        print_success "$dep 安装完成"
+      fi
+    done
 
-    if [[ "$OS" == "macos" ]]; then
-        # macOS 使用 Homebrew
-        deps+=("ripgrep" "fd" "node" "python3" "tree-sitter")
-
-        for dep in "${deps[@]}"; do
-            if ! command_exists "$dep"; then
-                print_info "安装 $dep..."
-                brew install "$dep"
-                print_success "$dep 安装完成"
-            else
-                print_success "$dep 已安装"
-            fi
-        done
-
-    elif [[ "$OS" == "linux" ]]; then
-        # Linux 根据发行版选择包管理器
-        if [[ "$DISTRO" == "ubuntu" ]] || [[ "$DISTRO" == "debian" ]]; then
-            sudo apt update
-            sudo apt install -y git curl wget ripgrep fd-find nodejs npm python3 python3-pip
-        elif [[ "$DISTRO" == "fedora" ]] || [[ "$DISTRO" == "rhel" ]]; then
-            sudo dnf install -y git curl wget ripgrep fd-find nodejs npm python3 python3-pip
-        elif [[ "$DISTRO" == "arch" ]] || [[ "$DISTRO" == "manjaro" ]]; then
-            sudo pacman -S --noconfirm git curl wget ripgrep fd nodejs npm python python-pip
-        fi
-        print_success "依赖工具安装完成"
-
-        # 在 Linux 上通过 npm 安装 tree-sitter-cli（如果未安装）
-        if ! command_exists tree-sitter; then
-            if command_exists npm; then
-                print_info "通过 npm 安装 tree-sitter-cli..."
-                sudo npm install -g tree-sitter-cli
-                print_success "tree-sitter-cli 安装完成"
-            else
-                print_warning "npm 未找到，无法安装 tree-sitter-cli"
-            fi
-        else
-            print_success "tree-sitter 已安装"
-        fi
+    if ! xcode-select -p >/dev/null 2>&1; then
+      print_warning "未检测到 Xcode Command Line Tools，建议执行: xcode-select --install"
     fi
+    return
+  fi
+
+  eval "$PKG_UPDATE"
+  case "$DISTRO" in
+    ubuntu|debian)
+      eval "$PKG_INSTALL git curl wget ripgrep fd-find nodejs npm python3 python3-pip make gcc unzip"
+      ;;
+    fedora|rhel|centos)
+      eval "$PKG_INSTALL git curl wget ripgrep fd-find nodejs npm python3 python3-pip make gcc unzip"
+      ;;
+    arch|manjaro)
+      eval "$PKG_INSTALL git curl wget ripgrep fd nodejs npm python python-pip make gcc unzip"
+      ;;
+  esac
+  print_success "依赖工具安装完成"
 }
 
-# 安装 Python 工具
-install_python_tools() {
-    print_header "安装 Python 工具"
+install_python_provider() {
+  print_header "配置 Python Provider（可选）"
 
-    # 检查并安装 pipx
-    if ! command_exists pipx; then
-        print_info "安装 pipx..."
-        if [[ "$OS" == "macos" ]]; then
-            brew install pipx
-            pipx ensurepath
-        elif [[ "$OS" == "linux" ]]; then
-            if command_exists pip3; then
-                python3 -m pip install --user pipx
-                python3 -m pipx ensurepath
-            else
-                print_warning "pip3 未找到，跳过 Python 工具安装"
-                return
-            fi
-        fi
-        print_success "pipx 安装完成"
-    else
-        print_success "pipx 已安装"
-    fi
+  if ! command_exists python3; then
+    print_warning "未检测到 python3，跳过。"
+    return
+  fi
 
-    # 使用 pipx 安装 Python 工具
-    if command_exists pipx; then
-        print_info "安装 Python linting/formatting 工具..."
-
-        local tools=("flake8" "black" "isort")
-        for tool in "${tools[@]}"; do
-            if pipx list | grep -q "^  package $tool"; then
-                print_success "$tool 已安装"
-            else
-                print_info "安装 $tool..."
-                pipx install "$tool" >/dev/null 2>&1 || print_warning "$tool 安装失败"
-                print_success "$tool 安装完成"
-            fi
-        done
-
-        print_success "Python 工具安装完成"
-        print_info "工具路径: ~/.local/bin (已添加到 PATH)"
-    else
-        print_warning "pipx 未找到，跳过 Python 工具安装"
-    fi
+  if python3 -m pip --version >/dev/null 2>&1; then
+    python3 -m pip install --user --upgrade pynvim >/dev/null 2>&1 || true
+    print_success "pynvim 已安装/更新"
+  else
+    print_warning "未检测到 pip，跳过 pynvim 安装。"
+  fi
 }
 
-# 安装 Nerd Font（可选）
 install_nerd_font() {
-    print_header "安装 Nerd Font"
+  print_header "安装 Nerd Font（可选）"
 
-    print_info "Maple Font 用于显示图标，建议安装"
-    read -p "是否安装 Maple Mono NF CN? (y/n) " -n 1 -r
-    echo
+  if ! confirm "是否安装 Maple Mono NF CN 字体？" false; then
+    print_info "跳过字体安装"
+    return
+  fi
 
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        if [[ "$OS" == "macos" ]]; then
-            # macOS 使用 Homebrew Cask
-            if ! brew list --cask font-maple-mono-nf-cn >/dev/null 2>&1; then
-                print_info "安装 Maple Mono NF CN..."
-                brew install --cask font-maple-mono-nf-cn
-                print_success "Maple Mono NF CN 安装完成"
-                print_warning "请在终端设置中将字体改为 'Maple Mono NF CN'"
-            else
-                print_success "Maple Mono NF CN 已安装"
-            fi
-        elif [[ "$OS" == "linux" ]]; then
-            # Linux 手动安装
-            print_info "下载 Maple Mono NF CN..."
-            mkdir -p ~/.local/share/fonts
-            cd ~/.local/share/fonts
-
-            if [ ! -d "maple-font" ]; then
-                print_info "从 GitHub 下载最新版本..."
-                LATEST_RELEASE=$(curl -s https://api.github.com/repos/subframe7536/maple-font/releases/latest | grep "browser_download_url.*MapleMono-NF-CN.zip" | cut -d '"' -f 4)
-                curl -fLo MapleMono-NF-CN.zip "$LATEST_RELEASE"
-                unzip -q MapleMono-NF-CN.zip -d maple-font
-                rm MapleMono-NF-CN.zip
-                fc-cache -fv
-                print_success "Maple Mono NF CN 安装完成"
-                print_warning "请在终端设置中将字体改为 'Maple Mono NF CN'"
-            else
-                print_success "Maple Mono NF CN 已安装"
-            fi
-
-            cd "$CURRENT_DIR"
-        fi
+  if [[ "$OS" == "macos" ]]; then
+    if brew list --cask font-maple-mono-nf-cn >/dev/null 2>&1; then
+      print_success "Maple Mono NF CN 已安装"
     else
-        print_info "跳过 Nerd Font 安装"
+      brew install --cask font-maple-mono-nf-cn
+      print_success "Maple Mono NF CN 安装完成"
     fi
+    return
+  fi
+
+  mkdir -p "$HOME/.local/share/fonts"
+  local font_dir="$HOME/.local/share/fonts/maple-font"
+
+  if [[ -d "$font_dir" ]]; then
+    print_success "Maple Mono NF CN 已安装"
+    return
+  fi
+
+  print_info "下载 Maple Mono NF CN..."
+  local tmp_zip
+  tmp_zip="$(mktemp /tmp/maple-font.XXXXXX.zip)"
+  local release_url
+  release_url="$(curl -s https://api.github.com/repos/subframe7536/maple-font/releases/latest | grep 'browser_download_url.*MapleMono-NF-CN.zip' | cut -d '"' -f 4)"
+
+  if [[ -z "$release_url" ]]; then
+    print_warning "获取字体下载地址失败，跳过字体安装。"
+    return
+  fi
+
+  curl -fL "$release_url" -o "$tmp_zip"
+  unzip -q "$tmp_zip" -d "$font_dir"
+  rm -f "$tmp_zip"
+  fc-cache -fv >/dev/null 2>&1 || true
+  print_success "Maple Mono NF CN 安装完成"
 }
 
-# 设置软链接
 setup_symlink() {
-    print_header "设置配置软链接"
+  print_header "设置配置软链接"
 
-    # 检查是否已存在配置
-    if [ -d "$HOME/.config/nvim" ] && [ ! -L "$HOME/.config/nvim" ]; then
-        print_warning "检测到现有 Neovim 配置: $HOME/.config/nvim"
-        read -p "是否备份并继续? (y/n) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            print_error "安装已取消"
-            exit 1
-        fi
+  local target="$HOME/.config/nvim"
+  mkdir -p "$HOME/.config"
 
-        backup_dir="$HOME/.config/nvim.backup.$(date +%Y%m%d_%H%M%S)"
-        print_info "备份到: $backup_dir"
-        mv "$HOME/.config/nvim" "$backup_dir"
-        print_success "备份完成"
+  if [[ -d "$target" && ! -L "$target" ]]; then
+    print_warning "检测到已有目录: $target"
+    if ! confirm "是否备份并继续？" false; then
+      print_error "用户取消安装"
+      exit 1
     fi
+    local backup_dir="$HOME/.config/nvim.backup.$(date +%Y%m%d_%H%M%S)"
+    mv "$target" "$backup_dir"
+    print_success "已备份到: $backup_dir"
+  fi
 
-    # 删除现有软链接
-    if [ -L "$HOME/.config/nvim" ]; then
-        print_info "删除现有软链接..."
-        rm "$HOME/.config/nvim"
-    fi
+  if [[ -L "$target" || -e "$target" ]]; then
+    rm -rf "$target"
+  fi
 
-    # 创建 ~/.config 目录
-    mkdir -p "$HOME/.config"
-
-    # 创建软链接
-    print_info "创建软链接: $CURRENT_DIR -> $HOME/.config/nvim"
-    ln -sf "$CURRENT_DIR" "$HOME/.config/nvim"
-    print_success "软链接创建完成"
+  ln -s "$CURRENT_DIR" "$target"
+  print_success "软链接创建完成: $target -> $CURRENT_DIR"
 }
 
-# 安装插件和 LSP
 install_plugins() {
-    print_header "安装 Neovim 插件"
+  print_header "安装插件"
 
-    print_info "首次启动 Neovim 会自动安装插件..."
-    print_info "这可能需要几分钟时间"
-    echo ""
-
-    # 使用 headless 模式安装插件，重定向输出避免干扰
-    print_info "正在安装插件..."
-    if nvim --headless "+Lazy! sync" +qa 2>/dev/null; then
-        print_success "插件安装完成"
-    else
-        print_warning "插件安装可能出现问题，但可以在首次启动 nvim 时自动完成"
-    fi
+  print_info "首次同步插件（可能需要 1~3 分钟）..."
+  if nvim --headless "+Lazy! sync" +qa >/tmp/pvim-lazy-sync.log 2>&1; then
+    print_success "插件安装完成"
+  else
+    print_warning "自动安装插件失败，可手动执行 :Lazy sync"
+    print_info "日志: /tmp/pvim-lazy-sync.log"
+  fi
 }
 
-# 主安装流程
+final_message() {
+  print_header "安装完成"
+
+  echo -e "${GREEN}✓ p-vim 已就绪，可以直接使用${NC}"
+  echo
+  echo "下一步："
+  echo "1. 运行: nvim"
+  echo "2. 执行: :checkhealth"
+  echo "3. 执行: :Lazy 查看插件状态"
+  echo "4. 打开任意代码文件验证高亮/补全/片段"
+  echo
+  echo "提示："
+  echo "- 若图标显示异常，请在终端切换到 Nerd Font"
+  echo "- 当前配置为轻量模式（无 LSP / 无 lint / 无 format）"
+}
+
 main() {
-    print_header "Neovim 配置自动安装脚本"
-    print_info "配置目录: $CURRENT_DIR"
+  print_header "p-vim 新电脑安装脚本"
+  print_info "配置目录: $CURRENT_DIR"
 
-    # 检测操作系统
-    detect_os
-
-    # 安装包管理器
-    install_package_manager
-
-    # 安装 Neovim
-    install_neovim
-
-    # 安装依赖
-    install_dependencies
-
-    # 安装 Python 工具
-    install_python_tools
-
-    # 安装字体（可选）
-    install_nerd_font
-
-    # 设置软链接
-    setup_symlink
-
-    # 安装插件
-    install_plugins
-
-    # 完成
-    print_header "安装完成！"
-
-    echo -e "${GREEN}✓ Neovim 配置已成功安装${NC}"
-    echo ""
-    echo "下一步："
-    echo ""
-    echo "1. 启动 Neovim:"
-    echo -e "   ${BLUE}nvim${NC}"
-    echo ""
-    echo "2. 检查健康状态:"
-    echo -e "   ${BLUE}:checkhealth${NC}"
-    echo ""
-    echo "3. Mason 会自动安装 LSP 服务器，也可以手动查看:"
-    echo -e "   ${BLUE}:Mason${NC}"
-    echo ""
-    echo "4. 尝试新功能:"
-    echo "   - 打开 Python 文件测试 LSP"
-    echo -e "   - 按 ${BLUE},${NC} 查看快捷键提示"
-    echo -e "   - 按 ${BLUE}s${NC} 快速跳转"
-    echo -e "   - 按 ${BLUE},xx${NC} 查看诊断列表"
-    echo ""
-    echo -e "${YELLOW}提示：${NC}"
-    echo "- 如果终端图标显示不正常，请确保使用 Maple Mono NF CN 字体"
-    echo "- 首次使用时 Mason 会在后台安装工具，请稍等片刻"
-    echo ""
-    echo -e "${BLUE}=========================================="
-    echo "回滚命令："
-    echo -e "==========================================${NC}"
-    echo ""
-    echo "如果需要回滚到旧配置："
-    echo -e "   ${BLUE}rm ~/.config/nvim${NC}"
-    echo -e "   ${BLUE}mv ~/.config/nvim.backup.* ~/.config/nvim${NC}"
-    echo ""
-
-    # 清理并正常退出
-    cd "$HOME" || true
-    exit 0
+  detect_os
+  setup_package_manager
+  install_neovim
+  install_dependencies
+  install_python_provider
+  install_nerd_font
+  setup_symlink
+  install_plugins
+  final_message
 }
 
-# 运行主程序
 main "$@"
-main

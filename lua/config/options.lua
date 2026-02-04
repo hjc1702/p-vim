@@ -23,24 +23,13 @@ g.loaded_ruby_provider = 0
 -- g.loaded_python3_provider = 0  -- 如需禁用可取消注释
 
 -- ==========================================
--- 环境变量设置
--- ==========================================
-
--- 添加 Mason 的 bin 目录到 PATH（用于 LSP 服务器）
-local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
-vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
-
--- ==========================================
 -- 基础设置
 -- ==========================================
 
 -- 历史记录容量
 opt.history = 2000
 
--- 文件类型检测
-vim.cmd('filetype on')
-vim.cmd('filetype plugin on')
-vim.cmd('filetype indent on')
+-- 文件类型检测（Neovim 0.11+ 默认已启用）
 
 -- 文件修改后自动载入
 opt.autoread = true

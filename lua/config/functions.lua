@@ -25,6 +25,7 @@ end
 -- 行号模式切换（相对/绝对）
 -- ==========================================
 M.number_toggle = function()
+  vim.g.auto_relativenumber = false
   if vim.opt.relativenumber:get() then
     vim.opt.relativenumber = false
     vim.opt.number = true
@@ -79,42 +80,5 @@ M.auto_set_file_head = function()
     vim.cmd("normal! o")
   end
 end
-
--- ==========================================
--- Python LSP 重启（虚拟环境切换后使用）
--- ==========================================
-M.restart_python_lsp = function()
-  local clients = vim.lsp.get_clients({ name = "pyright" })
-
-  if #clients == 0 then
-    vim.notify("Python LSP 未运行", vim.log.levels.WARN)
-    return
-  end
-
-  -- 停止所有 Python LSP 客户端
-  for _, client in ipairs(clients) do
-    client.stop()
-  end
-
-  vim.notify("正在重启 Python LSP...", vim.log.levels.INFO)
-
-  -- 延迟重启
-  vim.defer_fn(function()
-    vim.cmd("LspStart pyright")
-    vim.notify("Python LSP 已重启", vim.log.levels.INFO)
-  end, 500)
-end
-
--- 创建用户命令
-vim.api.nvim_create_user_command("RestartPythonLsp", M.restart_python_lsp, {
-  desc = "重启 Python LSP（虚拟环境切换后使用）"
-})
-
--- 快捷键 ,lr (LSP Restart)
-vim.keymap.set("n", "<leader>lr", M.restart_python_lsp, {
-  desc = "重启 Python LSP",
-  noremap = true,
-  silent = true,
-})
 
 return M
