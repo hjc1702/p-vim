@@ -8,17 +8,8 @@ local M = {}
 -- 代码折叠切换
 -- ==========================================
 M.toggle_fold = function()
-  if vim.g.fold_method == nil then
-    vim.g.fold_method = 0
-  end
-
-  if vim.g.fold_method == 0 then
-    vim.cmd("normal! zM")  -- 折叠所有
-    vim.g.fold_method = 1
-  else
-    vim.cmd("normal! zR")  -- 展开所有
-    vim.g.fold_method = 0
-  end
+  vim.g.fold_method = not vim.g.fold_method
+  vim.cmd("normal! " .. (vim.g.fold_method and "zM" or "zR"))
 end
 
 -- ==========================================
@@ -57,6 +48,9 @@ end
 -- 清理尾部空格
 -- ==========================================
 M.strip_trailing_whitespaces = function()
+  if vim.bo.readonly or not vim.bo.modifiable then
+    return
+  end
   local save_cursor = vim.fn.getpos(".")
   vim.cmd([[%s/\s\+$//e]])
   vim.fn.setpos(".", save_cursor)

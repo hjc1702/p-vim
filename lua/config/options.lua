@@ -143,7 +143,6 @@ opt.shiftround = true
 opt.hidden = true
 opt.wildmode = "list:longest"
 opt.wildmenu = true
-opt.ttyfast = true
 
 -- 数字格式（十进制）
 opt.nrformats = ""
@@ -155,7 +154,7 @@ opt.nrformats = ""
 -- 文件编码
 -- ==========================================
 
-opt.encoding = "utf-8"
+-- Neovim 默认使用 UTF-8，encoding 选项为只读
 opt.fileencodings = "ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1"
 opt.helplang = "cn"
 

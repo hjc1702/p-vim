@@ -176,25 +176,18 @@ return {
       end
 
       treesitter_configs.setup({
-        -- 安装的语言解析器
+        -- 安装的语言解析器（精简为常用语言，其他可按需 :TSInstall）
         ensure_installed = {
-          "lua",
-          "vim",
-          "vimdoc",
-          "python",
-          "javascript",
-          "typescript",
-          "html",
-          "css",
-          "json",
-          "yaml",
-          "toml",
-          "bash",
-          "c",
-          "cpp",
-          "rust",
-          "markdown",
+          "lua",       -- Neovim 配置
+          "vim",       -- Vim 配置
+          "vimdoc",    -- Vim 文档
+          "python",    -- Python
+          "javascript",-- JavaScript
+          "bash",      -- Shell 脚本
+          "markdown",  -- Markdown
           "markdown_inline",
+          "json",      -- JSON 配置
+          "yaml",      -- YAML 配置
         },
 
         -- 自动安装缺失的解析器
@@ -270,27 +263,6 @@ return {
           "RainbowDelimiterViolet",
           "RainbowDelimiterCyan",
         },
-      })
-
-      -- 立即启用当前 buffer
-      vim.defer_fn(function()
-        rainbow_delimiters.enable(0)
-      end, 100)
-
-      -- 为所有新 buffer 自动启用
-      vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "BufEnter" }, {
-        callback = function()
-          -- 延迟一点，确保 treesitter 已加载
-          vim.defer_fn(function()
-            local ok = pcall(rainbow_delimiters.enable, 0)
-            if not ok then
-              -- 如果失败，再次尝试
-              vim.defer_fn(function()
-                pcall(rainbow_delimiters.enable, 0)
-              end, 500)
-            end
-          end, 50)
-        end,
       })
     end,
   },

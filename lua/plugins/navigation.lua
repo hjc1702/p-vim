@@ -129,7 +129,7 @@ return {
       { "\\", "<cmd>Telescope live_grep<CR>", desc = "Live grep" },
 
       -- Buffer 列表
-      { "<leader>b", "<cmd>Telescope buffers<CR>", desc = "Buffers" },
+      { "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "Buffers" },
 
       -- 诊断列表
       { "<leader>fd", "<cmd>Telescope diagnostics<CR>", desc = "Diagnostics" },
@@ -297,9 +297,9 @@ return {
     "folke/flash.nvim",
     event = "VeryLazy",
     keys = {
-      -- 快速跳转（简化为单一快捷键）
+      -- 快速跳转（使用 gs 避免覆盖原生 s 命令）
       {
-        "s",
+        "gs",
         mode = { "n", "x", "o" },
         function() require("flash").jump() end,
         desc = "Flash jump"
@@ -307,7 +307,7 @@ return {
 
       -- 快速选择 Treesitter 节点
       {
-        "S",
+        "gS",
         mode = { "n", "o", "x" },
         function() require("flash").treesitter() end,
         desc = "Flash Treesitter"

@@ -2,12 +2,16 @@
 -- 自动命令配置
 -- ==========================================
 
+-- 创建 augroup 用于组织所有自动命令
+local augroup = vim.api.nvim_create_augroup("UserConfig", { clear = true })
+
 -- ==========================================
 -- 相对行号管理（根据模式切换）
 -- ==========================================
 
 -- 插入模式下使用绝对行号（方便查看当前位置）
 vim.api.nvim_create_autocmd("InsertEnter", {
+  group = augroup,
   pattern = "*",
   callback = function()
     if vim.g.auto_relativenumber == false then
@@ -20,6 +24,7 @@ vim.api.nvim_create_autocmd("InsertEnter", {
 
 -- 退出插入模式使用相对行号
 vim.api.nvim_create_autocmd("InsertLeave", {
+  group = augroup,
   pattern = "*",
   callback = function()
     if vim.g.auto_relativenumber == false then
@@ -33,19 +38,9 @@ vim.api.nvim_create_autocmd("InsertLeave", {
 -- 文件类型特定配置
 -- ==========================================
 
--- Python 文件配置
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "python",
-  callback = function()
-    vim.opt_local.tabstop = 4
-    vim.opt_local.shiftwidth = 4
-    vim.opt_local.expandtab = true
-    vim.opt_local.autoindent = true
-  end,
-})
-
 -- Ruby, JavaScript, HTML, CSS, XML 文件配置
 vim.api.nvim_create_autocmd("FileType", {
+  group = augroup,
   pattern = { "ruby", "javascript", "html", "css", "xml" },
   callback = function()
     vim.opt_local.tabstop = 2
@@ -58,6 +53,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- Markdown 文件类型
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = augroup,
   pattern = { "*.md", "*.mkd", "*.markdown" },
   callback = function()
     vim.bo.filetype = "markdown"
@@ -66,6 +62,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 
 -- Vue 文件配置
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = augroup,
   pattern = "*.vue",
   callback = function()
     vim.bo.filetype = "vue"
@@ -79,6 +76,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 
 -- HTML part 文件
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = augroup,
   pattern = "*.part",
   callback = function()
     vim.bo.filetype = "html"
@@ -87,20 +85,10 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 
 -- PHP 文件：禁用 <> 括号匹配
 vim.api.nvim_create_autocmd("BufWinEnter", {
+  group = augroup,
   pattern = "*.php",
   callback = function()
     vim.opt_local.matchpairs:remove("<:>")
-  end,
-})
-
--- ==========================================
--- 保存时清理尾部空格
--- ==========================================
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = { "*.c", "*.cpp", "*.java", "*.php", "*.js", "*.py", "*.rs", "*.xml", "*.yml", "*.perl" },
-  callback = function()
-    require("config.functions").strip_trailing_whitespaces()
   end,
 })
 
@@ -109,6 +97,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 -- ==========================================
 
 vim.api.nvim_create_autocmd("BufNewFile", {
+  group = augroup,
   pattern = { "*.sh", "*.py" },
   callback = function()
     require("config.functions").auto_set_file_head()
@@ -121,6 +110,7 @@ vim.api.nvim_create_autocmd("BufNewFile", {
 
 -- Python 文件中 # 号注释不回到行首
 vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+  group = augroup,
   pattern = "*.py",
   callback = function()
     vim.keymap.set('i', '#', 'X<c-h>#', { buffer = true, noremap = true })
@@ -132,6 +122,7 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
 -- ==========================================
 
 vim.api.nvim_create_autocmd("BufReadPost", {
+  group = augroup,
   pattern = "*",
   callback = function()
     local line = vim.fn.line("'\"")
@@ -146,6 +137,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 -- ==========================================
 
 vim.api.nvim_create_autocmd("FileType", {
+  group = augroup,
   pattern = "qf",
   callback = function()
     vim.keymap.set('n', '<CR>', '<CR>', { buffer = true, noremap = true })
@@ -159,6 +151,7 @@ vim.api.nvim_create_autocmd("FileType", {
 -- ==========================================
 
 vim.api.nvim_create_autocmd("CmdwinEnter", {
+  group = augroup,
   pattern = "*",
   callback = function()
     vim.keymap.set('n', '<CR>', '<CR>', { buffer = true, noremap = true })

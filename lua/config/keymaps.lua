@@ -147,8 +147,12 @@ keymap('n', '<C-n>', function() require('config.functions').number_toggle() end,
   { noremap = true, desc = "Toggle relative number" })
 
 -- 切换彩虹括号
-keymap('n', '<leader>tr', function() require('rainbow-delimiters').toggle(0) end,
-  { noremap = true, desc = "Toggle rainbow delimiters" })
+keymap('n', '<leader>tr', function()
+  local ok, rainbow_delimiters = pcall(require, 'rainbow-delimiters')
+  if ok then
+    rainbow_delimiters.toggle(0)
+  end
+end, { noremap = true, desc = "Toggle rainbow delimiters" })
 
 -- 注释快捷键（兼容旧习惯）
 keymap('n', '<leader>c<space>', 'gcc', { remap = true, desc = "Comment toggle line" })

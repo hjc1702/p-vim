@@ -46,6 +46,8 @@ cd p-vim
 
 ## ⌨️  常用快捷键
 
+> 📖 **完整快捷键文档**: 查看 [KEYMAPS.md](KEYMAPS.md) 获取所有 150+ 个快捷键的详细说明
+
 ### Leader 键说明
 - Leader: `,` (逗号)
 - 按下 `,` 后等待片刻，会自动显示 Which-key 提示面板
@@ -58,7 +60,7 @@ cd p-vim
 | `\` | 全局搜索 | Live grep 搜索内容 |
 | `,n` | 文件树 | 切换 NvimTree |
 | `gcc` | 注释行 | 切换行注释 |
-| `s` | 快速跳转 | Flash 跳转 |
+| `gs` | 快速跳转 | Flash 跳转 |
 | `[b` / `]b` | 切换 Buffer | 上一个/下一个 Buffer |
 | `,hp` | 预览 Git | 预览 Git 改动 |
 | `<C-h/j/k/l>` | 窗口导航 | 支持 Tmux 集成 |
@@ -73,7 +75,7 @@ cd p-vim
 | `,gf` | Git 文件搜索 | 只搜索 Git 文件 |
 | `,f` | 最近文件 | 历史文件列表 |
 | `\` | 全局搜索 | Live Grep |
-| `,b` | Buffer 列表 | 打开的文件 |
+| `,fb` | Buffer 列表 | 打开的文件 |
 | `,fu` | 文档符号 | Treesitter 符号 |
 | `,fU` | 光标符号 | 搜索光标下符号 |
 | `F9` | 代码大纲 | Aerial 大纲 |
