@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 # ==========================================
-# p-vim 一键安装脚本（新电脑可直接使用）
+# p-vim macOS 一键安装脚本
+# 仅支持 macOS，最小必要依赖
 # ==========================================
 
 set -Eeuo pipefail
 
-export DISABLE_AUTO_UPDATE=true
-export DISABLE_UPDATE_PROMPT=true
-
-trap 'echo; echo "脚本执行失败，请检查上面的报错信息。"; exit 1' ERR
+trap 'echo; echo "安装失败，请检查上面的错误信息。"; exit 1' ERR
 
 BASEDIR="$(cd -- "$(dirname -- "$0")" && pwd)"
 CURRENT_DIR="$BASEDIR"
@@ -18,11 +16,6 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
-
-OS=""
-DISTRO=""
-PKG_INSTALL=""
-PKG_UPDATE=""
 
 print_header() {
   echo
@@ -43,15 +36,17 @@ command_exists() {
 
 confirm() {
   local prompt="$1"
-  local default_yes="${2:-false}"
   local answer
-  if [[ "$default_yes" == "true" ]]; then
-    read -r -p "$prompt [Y/n] " answer || true
-    [[ -z "$answer" || "$answer" =~ ^[Yy]$ ]]
-  else
-    read -r -p "$prompt [y/N] " answer || true
-    [[ "$answer" =~ ^[Yy]$ ]]
+  read -r -p "$prompt [y/N] " answer || true
+  [[ "$answer" =~ ^[Yy]$ ]]
+}
+
+ensure_macos() {
+  if [[ "$OSTYPE" != darwin* ]]; then
+    print_error "该脚本仅支持 macOS。"
+    exit 1
   fi
+  print_success "检测到 macOS"
 }
 
 ensure_brew_in_path() {
@@ -62,203 +57,84 @@ ensure_brew_in_path() {
   fi
 }
 
-detect_os() {
-  if [[ "$OSTYPE" == darwin* ]]; then
-    OS="macos"
-    print_info "检测到 macOS"
+install_homebrew() {
+  print_header "检查 Homebrew"
+
+  ensure_brew_in_path
+  if command_exists brew; then
+    print_success "Homebrew 已安装"
     return
   fi
 
-  if [[ "$OSTYPE" == linux-gnu* ]]; then
-    OS="linux"
-    if [[ -f /etc/os-release ]]; then
-      # shellcheck source=/etc/os-release
-      . /etc/os-release
-      DISTRO="${ID:-unknown}"
-    else
-      DISTRO="unknown"
-    fi
-    print_info "检测到 Linux (${DISTRO})"
+  print_info "安装 Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  ensure_brew_in_path
+
+  if ! command_exists brew; then
+    print_error "Homebrew 安装失败，请手动安装后重试。"
+    exit 1
+  fi
+
+  print_success "Homebrew 安装完成"
+}
+
+install_xcode_clt() {
+  print_header "检查编译工具链"
+
+  if xcode-select -p >/dev/null 2>&1; then
+    print_success "Xcode Command Line Tools 已安装"
     return
   fi
 
-  print_error "不支持的操作系统: $OSTYPE"
+  print_warning "未检测到 Xcode Command Line Tools。"
+  print_info "LuaSnip / telescope-fzf-native / Treesitter 构建需要编译工具。"
+  if confirm "是否现在执行 xcode-select --install？"; then
+    xcode-select --install || true
+    print_warning "请完成弹窗安装后，重新执行本脚本。"
+    exit 0
+  fi
+
+  print_error "缺少编译工具，无法继续安装。"
   exit 1
 }
 
-setup_package_manager() {
-  if [[ "$OS" == "macos" ]]; then
-    ensure_brew_in_path
-    if ! command_exists brew; then
-      print_info "安装 Homebrew..."
-      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-      ensure_brew_in_path
+install_packages() {
+  print_header "安装必要依赖"
+
+  # 基于当前项目，仅保留必要依赖：
+  # neovim: 编辑器
+  # git: lazy.nvim 拉取插件
+  # curl: 安装流程/下载
+  # ripgrep: Telescope live_grep 与 todo-comments 搜索依赖
+  # fd: Telescope 文件搜索加速
+  # make: 构建 telescope-fzf-native 与 LuaSnip jsregexp
+  local deps=(neovim git curl ripgrep fd make)
+
+  for dep in "${deps[@]}"; do
+    if command_exists "$dep"; then
+      print_success "$dep 已安装"
+    else
+      print_info "安装 $dep..."
+      brew install "$dep"
+      print_success "$dep 安装完成"
     fi
-    if ! command_exists brew; then
-      print_error "Homebrew 安装失败，请手动安装后重试。"
-      exit 1
-    fi
-    print_success "Homebrew 可用"
-    return
-  fi
-
-  case "$DISTRO" in
-    ubuntu|debian)
-      PKG_UPDATE="sudo apt update"
-      PKG_INSTALL="sudo apt install -y"
-      ;;
-    fedora|rhel|centos)
-      PKG_UPDATE="sudo dnf makecache"
-      PKG_INSTALL="sudo dnf install -y"
-      ;;
-    arch|manjaro)
-      PKG_UPDATE="sudo pacman -Sy"
-      PKG_INSTALL="sudo pacman -S --noconfirm"
-      ;;
-    *)
-      print_error "暂不支持此 Linux 发行版: ${DISTRO}"
-      print_info "请手动安装: neovim git curl ripgrep fd node python3 make gcc"
-      exit 1
-      ;;
-  esac
-
-  print_success "包管理器已就绪"
-}
-
-version_ge() {
-  local current="$1"
-  local required="$2"
-  [[ "$(printf '%s\n' "$required" "$current" | sort -V | head -n1)" == "$required" ]]
-}
-
-install_neovim() {
-  print_header "检查 Neovim"
-
-  local need_install="false"
-
-  if command_exists nvim; then
-    local ver
-    ver="$(nvim --version | head -n1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
-    print_success "Neovim 已安装 (版本 ${ver})"
-    if ! version_ge "$ver" "0.10.0"; then
-      print_warning "Neovim 版本低于 0.10.0，建议升级。"
-      if confirm "是否升级 Neovim？" true; then
-        need_install="true"
-      fi
-    fi
-  else
-    need_install="true"
-  fi
-
-  if [[ "$need_install" != "true" ]]; then
-    return
-  fi
-
-  print_info "安装/升级 Neovim..."
-  if [[ "$OS" == "macos" ]]; then
-    brew install neovim || brew upgrade neovim
-  else
-    eval "$PKG_UPDATE"
-    eval "$PKG_INSTALL neovim"
-  fi
-
-  print_success "Neovim 安装完成"
-}
-
-install_dependencies() {
-  print_header "安装依赖工具"
-
-  if [[ "$OS" == "macos" ]]; then
-    local deps=(git curl wget ripgrep fd node python3 make)
-    for dep in "${deps[@]}"; do
-      if command_exists "$dep"; then
-        print_success "$dep 已安装"
-      else
-        print_info "安装 $dep..."
-        brew install "$dep"
-        print_success "$dep 安装完成"
-      fi
-    done
-
-    if ! xcode-select -p >/dev/null 2>&1; then
-      print_warning "未检测到 Xcode Command Line Tools，建议执行: xcode-select --install"
-    fi
-    return
-  fi
-
-  eval "$PKG_UPDATE"
-  case "$DISTRO" in
-    ubuntu|debian)
-      eval "$PKG_INSTALL git curl wget ripgrep fd-find nodejs npm python3 python3-pip make gcc unzip"
-      ;;
-    fedora|rhel|centos)
-      eval "$PKG_INSTALL git curl wget ripgrep fd-find nodejs npm python3 python3-pip make gcc unzip"
-      ;;
-    arch|manjaro)
-      eval "$PKG_INSTALL git curl wget ripgrep fd nodejs npm python python-pip make gcc unzip"
-      ;;
-  esac
-  print_success "依赖工具安装完成"
-}
-
-install_python_provider() {
-  print_header "配置 Python Provider（可选）"
-
-  if ! command_exists python3; then
-    print_warning "未检测到 python3，跳过。"
-    return
-  fi
-
-  if python3 -m pip --version >/dev/null 2>&1; then
-    python3 -m pip install --user --upgrade pynvim >/dev/null 2>&1 || true
-    print_success "pynvim 已安装/更新"
-  else
-    print_warning "未检测到 pip，跳过 pynvim 安装。"
-  fi
+  done
 }
 
 install_nerd_font() {
   print_header "安装 Nerd Font（可选）"
 
-  if ! confirm "是否安装 Maple Mono NF CN 字体？" false; then
+  if ! confirm "是否安装 Maple Mono NF CN 字体？"; then
     print_info "跳过字体安装"
     return
   fi
 
-  if [[ "$OS" == "macos" ]]; then
-    if brew list --cask font-maple-mono-nf-cn >/dev/null 2>&1; then
-      print_success "Maple Mono NF CN 已安装"
-    else
-      brew install --cask font-maple-mono-nf-cn
-      print_success "Maple Mono NF CN 安装完成"
-    fi
-    return
-  fi
-
-  mkdir -p "$HOME/.local/share/fonts"
-  local font_dir="$HOME/.local/share/fonts/maple-font"
-
-  if [[ -d "$font_dir" ]]; then
+  if brew list --cask font-maple-mono-nf-cn >/dev/null 2>&1; then
     print_success "Maple Mono NF CN 已安装"
-    return
+  else
+    brew install --cask font-maple-mono-nf-cn
+    print_success "Maple Mono NF CN 安装完成"
   fi
-
-  print_info "下载 Maple Mono NF CN..."
-  local tmp_zip
-  tmp_zip="$(mktemp /tmp/maple-font.XXXXXX.zip)"
-  local release_url
-  release_url="$(curl -s https://api.github.com/repos/subframe7536/maple-font/releases/latest | grep 'browser_download_url.*MapleMono-NF-CN.zip' | cut -d '"' -f 4)"
-
-  if [[ -z "$release_url" ]]; then
-    print_warning "获取字体下载地址失败，跳过字体安装。"
-    return
-  fi
-
-  curl -fL "$release_url" -o "$tmp_zip"
-  unzip -q "$tmp_zip" -d "$font_dir"
-  rm -f "$tmp_zip"
-  fc-cache -fv >/dev/null 2>&1 || true
-  print_success "Maple Mono NF CN 安装完成"
 }
 
 setup_symlink() {
@@ -269,7 +145,7 @@ setup_symlink() {
 
   if [[ -d "$target" && ! -L "$target" ]]; then
     print_warning "检测到已有目录: $target"
-    if ! confirm "是否备份并继续？" false; then
+    if ! confirm "是否备份并继续？"; then
       print_error "用户取消安装"
       exit 1
     fi
@@ -315,14 +191,13 @@ final_message() {
 }
 
 main() {
-  print_header "p-vim 新电脑安装脚本"
+  print_header "p-vim macOS 安装脚本"
   print_info "配置目录: $CURRENT_DIR"
 
-  detect_os
-  setup_package_manager
-  install_neovim
-  install_dependencies
-  install_python_provider
+  ensure_macos
+  install_homebrew
+  install_xcode_clt
+  install_packages
   install_nerd_font
   setup_symlink
   install_plugins
