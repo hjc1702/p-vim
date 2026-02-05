@@ -7,3 +7,6 @@ myconfig.sh
 init.vim
 .netrwhist
 autoload/
+
+# lazy.nvim 插件锁文件（各环境自己维护）
+lazy-lock.json
