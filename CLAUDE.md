@@ -208,3 +208,21 @@ return {
 3. 使用 `:messages` 查看错误消息
 4. 检查 `~/.local/share/nvim/` 和 `~/.cache/nvim/` 目录
 5. 临时禁用插件：在插件配置中添加 `enabled = false`
+
+### 常见问题
+
+**Q: 在新电脑上安装后提示 "nvim-treesitter not installed yet"**
+- **原因**：首次安装时，treesitter 配置被触发但插件还未完成安装
+- **解决**：已在配置中添加静默处理，不会影响使用
+- **确认**：运行 `./install-neovim.sh` 会自动完成 treesitter 解析器安装
+
+**Q: 每次 Lazy sync 都修改 lazy-lock.json**
+- **原因**：treesitter 的 `auto_install` 会自动安装新解析器
+- **解决**：已禁用 `auto_install`，解析器由安装脚本统一安装
+- **手动管理**：需要新语言支持时，运行 `:TSInstall <language>`
+
+**Q: lazy-lock.json 是否应该提交到 Git**
+- **答案**：是的，应该提交到版本控制
+- **用途**：锁定插件版本，确保多环境一致性
+- **更新**：主动更新插件后（`:Lazy update`），提交新的 lockfile
+

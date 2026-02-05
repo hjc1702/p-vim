@@ -168,6 +168,14 @@ install_plugins() {
   print_info "首次同步插件（可能需要 1~3 分钟）..."
   if nvim --headless "+Lazy! sync" +qa >/tmp/pvim-lazy-sync.log 2>&1; then
     print_success "插件安装完成"
+
+    print_info "安装 Treesitter 语言解析器..."
+    if nvim --headless "+TSUpdateSync" +qa >/tmp/pvim-treesitter.log 2>&1; then
+      print_success "Treesitter 解析器安装完成"
+    else
+      print_warning "Treesitter 解析器安装可能失败，可手动执行 :TSUpdate"
+      print_info "日志: /tmp/pvim-treesitter.log"
+    fi
   else
     print_warning "自动安装插件失败，可手动执行 :Lazy sync"
     print_info "日志: /tmp/pvim-lazy-sync.log"

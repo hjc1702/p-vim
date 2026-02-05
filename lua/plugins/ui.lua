@@ -171,7 +171,7 @@ return {
       -- 添加错误保护，防止插件未安装时报错
       local ok, treesitter_configs = pcall(require, "nvim-treesitter.configs")
       if not ok then
-        vim.notify("nvim-treesitter not installed yet, skipping configuration", vim.log.levels.WARN)
+        -- 静默跳过，避免首次安装时显示警告
         return
       end
 
@@ -190,8 +190,9 @@ return {
           "yaml",      -- YAML 配置
         },
 
-        -- 自动安装缺失的解析器
-        auto_install = true,
+        -- 禁用自动安装，避免 lazy-lock.json 频繁变动
+        -- 首次安装后需手动运行 :TSUpdate 或在安装脚本中执行
+        auto_install = false,
 
         -- 语法高亮
         highlight = {
