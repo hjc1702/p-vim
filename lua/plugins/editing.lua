@@ -51,19 +51,10 @@ return {
     event = "VeryLazy",
     config = function()
       require("nvim-surround").setup({
-        -- 配置参数
-        keymaps = {
-          insert = "<C-g>s",
-          insert_line = "<C-g>S",
-          normal = "ys",
-          normal_cur = "yss",
-          normal_line = "yS",
-          normal_cur_line = "ySS",
-          visual = "S",
-          visual_line = "gS",
-          delete = "ds",
-          change = "cs",
-        },
+        -- nvim-surround v4 使用默认快捷键，不再在 setup 中配置
+        -- 默认快捷键: ys{motion}{char}, ds{char}, cs{target}{replacement}
+        -- yss{char} (整行), S{char} (visual模式)
+
         surrounds = {
           -- 自定义包围符号
           ["("] = { add = { "(", ")" } },
