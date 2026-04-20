@@ -46,7 +46,7 @@ keymap('n', 'gj', 'j', { noremap = true })
 
 -- 窗口缩放
 keymap('n', '<Leader>z', function() require('config.functions').zoom_toggle() end,
-  { noremap = true, silent = true, desc = "Toggle window zoom" })
+  { noremap = true, silent = true, desc = "切换窗口最大化" })
 
 -- ==========================================
 -- 行首行尾快速跳转
@@ -140,11 +140,11 @@ keymap('n', 'U', '<C-r>', { noremap = true })
 
 -- 代码折叠切换
 keymap('n', '<leader>zz', function() require('config.functions').toggle_fold() end,
-  { noremap = true, desc = "Toggle fold all" })
+  { noremap = true, desc = "折叠/展开全部代码" })
 
 -- 行号模式切换
 keymap('n', '<C-n>', function() require('config.functions').number_toggle() end,
-  { noremap = true, desc = "Toggle relative number" })
+  { noremap = true, desc = "切换相对行号" })
 
 -- 切换彩虹括号
 keymap('n', '<leader>tr', function()
@@ -152,11 +152,11 @@ keymap('n', '<leader>tr', function()
   if ok then
     rainbow_delimiters.toggle(0)
   end
-end, { noremap = true, desc = "Toggle rainbow delimiters" })
+end, { noremap = true, desc = "切换彩虹括号" })
 
 -- 注释快捷键（兼容旧习惯）
-keymap('n', '<leader>c<space>', 'gcc', { remap = true, desc = "Comment toggle line" })
-keymap('x', '<leader>c<space>', 'gc', { remap = true, desc = "Comment toggle (visual)" })
+keymap('n', '<leader>c<space>', 'gcc', { remap = true, desc = "切换行注释" })
+keymap('x', '<leader>c<space>', 'gc', { remap = true, desc = "切换注释（可视模式）" })
 
 -- 说明：插件相关的快捷键在各自的插件配置文件中定义
 -- 例如：

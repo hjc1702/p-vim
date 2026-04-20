@@ -77,12 +77,12 @@ return {
     "numToStr/Comment.nvim",
     event = "VeryLazy",
     keys = {
-      { "gcc", mode = "n", desc = "Comment toggle current line" },
-      { "gc", mode = { "n", "o" }, desc = "Comment toggle linewise" },
-      { "gc", mode = "x", desc = "Comment toggle linewise (visual)" },
-      { "gbc", mode = "n", desc = "Comment toggle current block" },
-      { "gb", mode = { "n", "o" }, desc = "Comment toggle blockwise" },
-      { "gb", mode = "x", desc = "Comment toggle blockwise (visual)" },
+      { "gcc", mode = "n", desc = "切换当前行注释" },
+      { "gc", mode = { "n", "o" }, desc = "切换行注释" },
+      { "gc", mode = "x", desc = "切换行注释（可视模式）" },
+      { "gbc", mode = "n", desc = "切换当前块注释" },
+      { "gb", mode = { "n", "o" }, desc = "切换块注释" },
+      { "gb", mode = "x", desc = "切换块注释（可视模式）" },
     },
     config = function()
       require("Comment").setup({
@@ -168,7 +168,7 @@ return {
       {
         "<leader><space>",
         "<cmd>lua MiniTrailspace.trim()<CR>",
-        desc = "Trim trailing whitespace"
+        desc = "清理尾部空格"
       },
     },
     config = function()
@@ -195,11 +195,11 @@ return {
       "TmuxNavigatePrevious",
     },
     keys = {
-      { "<C-h>", "<cmd>TmuxNavigateLeft<cr>", desc = "Navigate left" },
-      { "<C-j>", "<cmd>TmuxNavigateDown<cr>", desc = "Navigate down" },
-      { "<C-k>", "<cmd>TmuxNavigateUp<cr>", desc = "Navigate up" },
-      { "<C-l>", "<cmd>TmuxNavigateRight<cr>", desc = "Navigate right" },
-      { "<C-\\>", "<cmd>TmuxNavigatePrevious<cr>", desc = "Navigate previous" },
+      { "<C-h>", "<cmd>TmuxNavigateLeft<cr>", desc = "移动到左侧窗口" },
+      { "<C-j>", "<cmd>TmuxNavigateDown<cr>", desc = "移动到下方窗口" },
+      { "<C-k>", "<cmd>TmuxNavigateUp<cr>", desc = "移动到上方窗口" },
+      { "<C-l>", "<cmd>TmuxNavigateRight<cr>", desc = "移动到右侧窗口" },
+      { "<C-\\>", "<cmd>TmuxNavigatePrevious<cr>", desc = "移动到上一个窗口" },
     },
   },
 }

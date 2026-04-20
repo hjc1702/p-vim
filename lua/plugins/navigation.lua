@@ -10,7 +10,7 @@ return {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     keys = {
-      { "<leader>n", "<cmd>NvimTreeToggle<CR>", desc = "Toggle file tree" },
+      { "<leader>n", "<cmd>NvimTreeToggle<CR>", desc = "切换文件树" },
     },
     config = function()
       -- 禁用 netrw
@@ -103,16 +103,16 @@ return {
     cmd = "Telescope",
     keys = {
       -- 文件搜索（替代 CtrlP）
-      { "<leader>p", "<cmd>Telescope find_files<CR>", desc = "Find files" },
+      { "<leader>p", "<cmd>Telescope find_files<CR>", desc = "查找文件" },
 
       -- Git 文件搜索（只搜索 Git 跟踪的文件）
-      { "<leader>gf", "<cmd>Telescope git_files<CR>", desc = "Git files" },
+      { "<leader>gf", "<cmd>Telescope git_files<CR>", desc = "Git 文件" },
 
       -- 最近文件（替代 CtrlP MRU）
-      { "<leader>f", "<cmd>Telescope oldfiles<CR>", desc = "Recent files" },
+      { "<leader>f", "<cmd>Telescope oldfiles<CR>", desc = "最近文件" },
 
       -- 函数/符号导航（Treesitter）
-      { "<leader>fu", "<cmd>Telescope treesitter<CR>", desc = "Document symbols (Treesitter)" },
+      { "<leader>fu", "<cmd>Telescope treesitter<CR>", desc = "文档符号（Treesitter）" },
 
       -- 光标下单词的函数导航（Treesitter）
       {
@@ -122,26 +122,26 @@ return {
             default_text = vim.fn.expand("<cword>")
           })
         end,
-        desc = "Symbols under cursor (Treesitter)"
+        desc = "光标下符号（Treesitter）"
       },
 
       -- 全局搜索（替代 CtrlSF）
-      { "\\", "<cmd>Telescope live_grep<CR>", desc = "Live grep" },
+      { "\\", "<cmd>Telescope live_grep<CR>", desc = "全局搜索" },
 
       -- Buffer 列表
-      { "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "Buffers" },
+      { "<leader>fb", "<cmd>Telescope buffers<CR>", desc = "缓冲区列表" },
 
       -- 诊断列表
-      { "<leader>fd", "<cmd>Telescope diagnostics<CR>", desc = "Diagnostics" },
+      { "<leader>fd", "<cmd>Telescope diagnostics<CR>", desc = "诊断列表" },
 
       -- 命令历史
-      { "<leader>fh", "<cmd>Telescope command_history<CR>", desc = "Command history" },
+      { "<leader>fh", "<cmd>Telescope command_history<CR>", desc = "命令历史" },
 
       -- 搜索历史
-      { "<leader>fs", "<cmd>Telescope search_history<CR>", desc = "Search history" },
+      { "<leader>fs", "<cmd>Telescope search_history<CR>", desc = "搜索历史" },
 
       -- 快捷键列表
-      { "<leader>fk", "<cmd>Telescope keymaps<CR>", desc = "Keymaps" },
+      { "<leader>fk", "<cmd>Telescope keymaps<CR>", desc = "快捷键列表" },
     },
     config = function()
       local telescope = require("telescope")
@@ -245,7 +245,7 @@ return {
       "nvim-tree/nvim-web-devicons",
     },
     keys = {
-      { "<F9>", "<cmd>AerialToggle!<CR>", desc = "Toggle code outline" },
+      { "<F9>", "<cmd>AerialToggle!<CR>", desc = "切换代码大纲" },
     },
     config = function()
       require("aerial").setup({
@@ -302,7 +302,7 @@ return {
         "gs",
         mode = { "n", "x", "o" },
         function() require("flash").jump() end,
-        desc = "Flash jump"
+        desc = "闪跳"
       },
 
       -- 快速选择 Treesitter 节点
@@ -310,7 +310,7 @@ return {
         "gS",
         mode = { "n", "o", "x" },
         function() require("flash").treesitter() end,
-        desc = "Flash Treesitter"
+        desc = "Treesitter 选择"
       },
 
       -- 搜索模式下的 Flash（可选）
@@ -318,7 +318,7 @@ return {
         "<c-s>",
         mode = { "c" },
         function() require("flash").toggle() end,
-        desc = "Toggle Flash Search"
+        desc = "切换 Flash 搜索"
       },
     },
     config = function()
@@ -365,10 +365,10 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     cmd = { "Trouble", "TroubleToggle" },
     keys = {
-      { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
-      { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
-      { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
-      { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" },
+      { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "诊断列表（Trouble）" },
+      { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "当前文件诊断（Trouble）" },
+      { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "位置列表（Trouble）" },
+      { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix 列表（Trouble）" },
     },
     opts = {
       use_diagnostic_signs = true,
@@ -436,7 +436,7 @@ return {
               gs.next_hunk()
             end)
             return "<Ignore>"
-          end, { expr = true, desc = "Next hunk" })
+          end, { expr = true, desc = "下一个 Hunk" })
 
           map("n", "[c", function()
             if vim.wo.diff then
@@ -446,33 +446,33 @@ return {
               gs.prev_hunk()
             end)
             return "<Ignore>"
-          end, { expr = true, desc = "Previous hunk" })
+          end, { expr = true, desc = "上一个 Hunk" })
 
           -- Actions
-          map("n", "<leader>hs", gs.stage_hunk, { desc = "Stage hunk" })
-          map("n", "<leader>hr", gs.reset_hunk, { desc = "Reset hunk" })
+          map("n", "<leader>hs", gs.stage_hunk, { desc = "暂存 Hunk" })
+          map("n", "<leader>hr", gs.reset_hunk, { desc = "重置 Hunk" })
           map("v", "<leader>hs", function()
             gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
-          end, { desc = "Stage hunk" })
+          end, { desc = "暂存 Hunk" })
           map("v", "<leader>hr", function()
             gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
-          end, { desc = "Reset hunk" })
-          map("n", "<leader>hS", gs.stage_buffer, { desc = "Stage buffer" })
-          map("n", "<leader>hu", gs.undo_stage_hunk, { desc = "Undo stage hunk" })
-          map("n", "<leader>hR", gs.reset_buffer, { desc = "Reset buffer" })
-          map("n", "<leader>hp", gs.preview_hunk, { desc = "Preview hunk" })
+          end, { desc = "重置 Hunk" })
+          map("n", "<leader>hS", gs.stage_buffer, { desc = "暂存整个文件" })
+          map("n", "<leader>hu", gs.undo_stage_hunk, { desc = "撤销暂存 Hunk" })
+          map("n", "<leader>hR", gs.reset_buffer, { desc = "重置整个文件" })
+          map("n", "<leader>hp", gs.preview_hunk, { desc = "预览 Hunk" })
           map("n", "<leader>hb", function()
             gs.blame_line({ full = true })
-          end, { desc = "Blame line" })
-          map("n", "<leader>tb", gs.toggle_current_line_blame, { desc = "Toggle line blame" })
-          map("n", "<leader>hd", gs.diffthis, { desc = "Diff this" })
+          end, { desc = "查看行 Blame" })
+          map("n", "<leader>tb", gs.toggle_current_line_blame, { desc = "切换行 Blame" })
+          map("n", "<leader>hd", gs.diffthis, { desc = "查看 Diff" })
           map("n", "<leader>hD", function()
             gs.diffthis("~")
-          end, { desc = "Diff this ~" })
-          map("n", "<leader>td", gs.toggle_deleted, { desc = "Toggle deleted" })
+          end, { desc = "与上一个提交对比" })
+          map("n", "<leader>td", gs.toggle_deleted, { desc = "切换显示已删除行" })
 
           -- Text object
-          map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { desc = "Select hunk" })
+          map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { desc = "选择 Hunk" })
         end,
       })
     end,
